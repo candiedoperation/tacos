@@ -1,2 +1,2 @@
-# tacos
+# tacOS
 A hobby Operating System!
