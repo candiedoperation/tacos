@@ -1,5 +1,7 @@
 # Required Build Tools
 
+⚠️ Package names have been listed to match Debian distributions and the `apt` package manager. Your distro might have different package names.
+
 - The `build-essentials` package. Tools include `g++`, `ld`, `make`, etc.
 
 - The `nasm` assembler
