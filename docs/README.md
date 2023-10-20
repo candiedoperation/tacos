@@ -1,3 +1,7 @@
+# tacOS Documentation
+
+In this documentation folder, every file except the Readme refers to a particular code file in the source. The directory structure and file names of source files are exactly matched in the documentation to aid easy access of documentation for a specific source file.
+
 # Required Build Tools
 
 ⚠️ Package names have been listed to match Debian distributions and the `apt` package manager. Your distro might have different package names.
@@ -29,7 +33,3 @@ There are two ways of getting the source code compiled, up and running. Both of 
 - Install the Required Build tools
 
 - `make run`
-
-
-
-
