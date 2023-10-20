@@ -1,26 +1,45 @@
 #Global Variables
-GPP_PARAMETERS = -m32
+GPP_PARAMETERS = -m64 -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore
 AS_PARAMETERS = --32
-LD_PARAMETERS = -melf_i386
+LD_PARAMETERS = -n
 
-#Other Variables
-KRNL_DEPENDENCIES = osloader.o kernel.o
+#Other Variables  $(BUILD_PATH)/kernel.o
 BUILD_PATH = build
+KRNL_DEPENDENCIES = $(BUILD_PATH)/osloader.o
 
 #Compile *.cpp to *.o
-%.o: %.cpp
+$(BUILD_PATH)/%.o: %.cpp
 	mkdir -p $(BUILD_PATH)
-	g++ $(GPP_PARAMETERS) -o $(BUILD_PATH)/$@ -c $<
+	g++ $(GPP_PARAMETERS) -o $@ -c $<
 
 #Compile *.asm to *.o
-%.o: %.asm
+$(BUILD_PATH)/%.o: %.asm
 	mkdir -p $(BUILD_PATH)
-	as $(AS_PARAMETERS) -o $(BUILD_PATH)/$@ -c $<
+	nasm -f elf64 $< -o $@
 
 #Kernel.bin depends on linker.ld, defined files
-kernel.bin: linker.ld $(KRNL_DEPENDENCIES)
+$(BUILD_PATH)/kernel.bin: linker.ld $(KRNL_DEPENDENCIES)
 	mkdir -p $(BUILD_PATH)
-	ld $(LD_PARAMETERS) -T $< -o $(BUILD_PATH)/$@ $(KRNL_DEPENDENCIES)
+	ld $(LD_PARAMETERS) -T $< -o $@ $(KRNL_DEPENDENCIES)
+
+$(BUILD_PATH)/tacos.iso: $(BUILD_PATH)/kernel.bin
+# Copy kernel.bin, Create GRUB Config, Folder needs to be named "boot"
+	mkdir -p $(BUILD_PATH)/iso_build/boot/grub
+
+	cp $< $(BUILD_PATH)/iso_build/boot
+	echo 'set timeout=5' >> $(BUILD_PATH)/iso_build/boot/grub/grub.cfg
+	echo '' >> $(BUILD_PATH)/iso_build/boot/grub.cfg
+	echo 'menuentry "tacOS 0.1" {' >> $(BUILD_PATH)/iso_build/boot/grub/grub.cfg
+	echo '	multiboot2 /boot/kernel.bin' >> $(BUILD_PATH)/iso_build/boot/grub/grub.cfg
+	echo '	boot' >> $(BUILD_PATH)/iso_build/boot/grub/grub.cfg
+	echo '}' >> $(BUILD_PATH)/iso_build/boot/grub/grub.cfg
+
+# Create ISO image
+	grub-mkrescue --output=$@ $(BUILD_PATH)/iso_build
+	rm -rf $(BUILD_PATH)/iso_build/
+
+run: $(BUILD_PATH)/tacos.iso
+	qemu-system-x86_64 -cdrom $(BUILD_PATH)/tacos.iso
 
 clean:
 	rm -rf $(BUILD_PATH)/

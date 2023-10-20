@@ -1,25 +1,20 @@
-#Define GRUB Specifics
-.set GRUB_MAGIC, 0x1badb002
-.set GRUB_FLAGS, (1<<0 | 1<<1)
-.set GRUB_CHKSUM, -(GRUB_MAGIC + GRUB_FLAGS)
+global start
 
-#Define the GRUB Multiboot section
-.section .multiboot
-    .long GRUB_MAGIC
-    .long GRUB_FLAGS
-    .long GRUB_CHKSUM
+section .multiboot
+mboot_start:
+    dd 0xe85250d6                                    ; Multiboot Magic #
+    dd 0                                             ; i386 Protected Mdoe
+    dd mboot_end - mboot_start                       ; Header Length
+    dd 0x100000000 - (0xe85250d6 + 0 + (mboot_end - mboot_start)) ; Checksum
 
-.section .text
-.extern InitKernel
-.global entry
+    ; Required End Flags
+    dw 0 ; Type
+    dw 0 ; Flags
+    dd 8 ; Size
+mboot_end:
 
-entry:
-    mov $KernelStack, %esp
-    call InitKernel
-
-.section .bss
-
-#Add 1MB Padding
-.space 1024 * 1024
-
-KernelStack:
+section .text
+bits 32 ; Set CPU to 32 Bit Protected Mode
+start:
+    mov dword [0xb8000], 0x2f4b2f4f
+    hlt
