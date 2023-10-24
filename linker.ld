@@ -9,6 +9,16 @@ SECTIONS {
         *(.multiboot)
     }
 
+    .data :
+    {
+      *(.data)
+    }
+
+    .bss :
+    {
+      *(.bss)
+    }
+
     .text :
     {
         *(.text)
