@@ -15,7 +15,7 @@ void clear_screen() {
 extern "C" void load_kernel() {
     /* Kernel Entrypoint */
     clear_screen();
-    printf("Hello World! Code From C++ has been called from the assembly osloader.asm file!");
+    printf("Welcome to tacOS!");
 
     while(1 == 1) {
         /* Prevent Exit */
