@@ -5,7 +5,7 @@ LD_PARAMETERS = -n
 
 #Other Variables  $(BUILD_PATH)/kernel.o
 BUILD_PATH = build
-KRNL_DEPENDENCIES = $(BUILD_PATH)/osloader.o
+KRNL_DEPENDENCIES = $(BUILD_PATH)/osloader.o $(BUILD_PATH)/os64loader.o $(BUILD_PATH)/kernel.o
 
 #Compile *.cpp to *.o
 $(BUILD_PATH)/%.o: %.cpp
@@ -40,6 +40,9 @@ $(BUILD_PATH)/tacos.iso: $(BUILD_PATH)/kernel.bin
 
 run: $(BUILD_PATH)/tacos.iso
 	qemu-system-x86_64 -cdrom $(BUILD_PATH)/tacos.iso
+
+run-debug: $(BUILD_PATH)/tacos.iso
+	qemu-system-x86_64 -cdrom $(BUILD_PATH)/tacos.iso -d int -no-reboot -no-shutdown
 
 clean:
 	rm -rf $(BUILD_PATH)/

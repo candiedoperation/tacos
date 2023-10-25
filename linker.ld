@@ -1,4 +1,4 @@
-ENTRY(start)
+ENTRY(osload)
 
 SECTIONS {
     . = 1M;
@@ -12,6 +12,11 @@ SECTIONS {
     .data :
     {
       *(.data)
+    }
+
+    .rodata :
+    {
+      *(.rodata)
     }
 
     .bss :

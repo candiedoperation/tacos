@@ -1,4 +1,5 @@
-global start
+global osload
+extern os64load
 
 section .multiboot
 mboot_start:
@@ -13,6 +14,15 @@ mboot_start:
     dd 8 ; Size
 mboot_end:
 
+section .rodata
+gdt64:
+    dq 0 ; zero entry
+.code: equ $ - gdt64 ; new
+    dq (1<<43) | (1<<44) | (1<<47) | (1<<53) ; code segment
+.pointer:
+    dw $ - gdt64 - 1
+    dq gdt64
+
 section .data
     msg_head db "-------[ osloader.asm ]-------", 0
     msg_init db "* Initialization OK", 0
@@ -21,11 +31,22 @@ section .data
     msg_error db "CPU Error ", 0
     msg_call db "* Loading tacOS Kernel", 0
 
+section .bss
+align 4096
+pml4_table:
+    resb 4096
+pdp_table:
+    resb 4096
+pd_table:
+    resb 4096
+page_table:
+    resb 4096
+
 section .text
 bits 32 ; Set CPU to 32 Bit Protected Mode
 
 ; Entrypoint
-start:
+osload:
     push 0x0f
     push 0x000b8000
     push msg_head
@@ -50,10 +71,18 @@ start:
     push msg_verified
     call print
 
+    ; Call External Function
     push 0x0a
     push 0x000b8320
     push msg_call
     call print
+
+    ; Enable Long Mode
+    call memory_paging
+    call enable_paging
+
+    lgdt [gdt64.pointer]
+    jmp gdt64.code:os64load
 
     hlt
 
@@ -141,6 +170,54 @@ check_lm:
 error_lm:
     mov ebx, 0x43
     jmp error
+
+; Setup Basic Paging
+memory_paging:
+    ; Map PDP Table to first PML4 Entry
+    mov edx, pdp_table ; Move Memory Address of pdp_table to edx
+    or edx, 0b11 ; Present + Writable bits
+    mov [pml4_table], edx ; Move edx to pml4_table's first index
+
+    ; Map PD Table to first PDP Table Entry
+    mov edx, pd_table
+    or edx, 0b11
+    mov [pdp_table], edx
+
+    ; Map each PD Table entry to a 2MB Page
+    mov ecx, 0
+    map_pd:
+        mov eax, 0x200000
+        mul ecx ; ecx -> source, eax -> destination (implied)
+        or eax, 0b10000011 ; present + writable + huge
+        mov [pd_table + (ecx * 8)], eax
+
+        inc ecx
+        cmp ecx, 512
+        jne map_pd
+    
+    enable_paging:
+    ; Load PML4 Table to CR3 Register
+    mov eax, pml4_table
+    mov cr3, eax
+
+    ; Enable Physical Address Extension (PAE) using the CR4 Register
+    mov eax, cr4
+    or eax, 1 << 5
+    mov cr4, eax
+
+    ; Set Long Mode bit in Model Specific Register
+    mov ecx, 0xC0000080
+    rdmsr
+    or eax, 1 << 8
+    wrmsr
+
+    ; Enable Paging in CR0 Register
+    mov eax, cr0
+    or eax, 1 << 31
+    mov cr0, eax
+
+    ; Return memory_paging
+    ret
 
 ; Print
 print:
