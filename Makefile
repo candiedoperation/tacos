@@ -5,21 +5,26 @@ LD_PARAMETERS = -n
 
 #Other Variables  $(BUILD_PATH)/kernel.o
 BUILD_PATH = build
-KRNL_DEPENDENCIES = $(BUILD_PATH)/osloader.o $(BUILD_PATH)/os64loader.o $(BUILD_PATH)/kernel.o
+KRNL_DEPENDENCIES = $(BUILD_PATH)/osloader/osloader.o \
+					$(BUILD_PATH)/osloader/os64loader.o \
+					$(BUILD_PATH)/tacoskrnl/tacoskrnl.o
+
+#Define PHONY
+.PHONY = run run-debug clean
 
 #Compile *.cpp to *.o
 $(BUILD_PATH)/%.o: %.cpp
-	mkdir -p $(BUILD_PATH)
+	mkdir -p $(dir $@)
 	g++ $(GPP_PARAMETERS) -o $@ -c $<
 
 #Compile *.asm to *.o
 $(BUILD_PATH)/%.o: %.asm
-	mkdir -p $(BUILD_PATH)
+	mkdir -p $(dir $@)
 	nasm -f elf64 $< -o $@
 
 #Kernel.bin depends on linker.ld, defined files
 $(BUILD_PATH)/kernel.bin: linker.ld $(KRNL_DEPENDENCIES)
-	mkdir -p $(BUILD_PATH)
+	mkdir -p $(dir $@)
 	ld $(LD_PARAMETERS) -T $< -o $@ $(KRNL_DEPENDENCIES)
 
 $(BUILD_PATH)/tacos.iso: $(BUILD_PATH)/kernel.bin

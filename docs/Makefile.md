@@ -1,3 +1,9 @@
+© Copyright 2023 Atheesh Thirumalairajan
+
+View LICENSE.md for More Information
+
+---
+
 # Makefile
 
 `GPP_PARAMETERS` let's us set the compiler parameters for `g++` . The `-m32` flag compiles the code for 32-bit processors.

@@ -1,3 +1,9 @@
+© Copyright 2023 Atheesh Thirumalairajan
+
+View LICENSE.md for More Information
+
+---
+
 # osloader.asm
 
 `.global start` defines the global function **start**
