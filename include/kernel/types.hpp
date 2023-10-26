@@ -16,26 +16,16 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-void printf(char* str) {
-    unsigned short* vm = (unsigned short*) 0xb8000;
-    for (int i = 0; str[i] != '\0'; i++) {
-        vm[i] = ((unsigned short) 0x0e << 8) | str[i];
+#ifndef TACOS_TYPES_HPP
+#define TACOS_TYPES_HPP
+
+namespace tacos {
+    namespace Kernel {
+        typedef unsigned char Byte;
+        typedef unsigned short Word;
+        typedef unsigned int Dword;
+        typedef unsigned long long int Qword;
     }
 }
 
-void clear_screen() {
-    unsigned short* vm = (unsigned short*) 0xb8000;
-    for (int i = 0; i < 2000; i++) {
-        vm[i] = ((unsigned short) 0x0f << 8) | 0x00;
-    }
-}
-
-extern "C" void load_kernel() {
-    /* Kernel Entrypoint */
-    clear_screen();
-    printf("Welcome to tacOS!");
-
-    while(1 == 1) {
-        /* Prevent Exit */
-    }
-}
+#endif

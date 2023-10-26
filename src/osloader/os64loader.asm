@@ -15,7 +15,7 @@
 ;   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 global os64load
-extern load_kernel
+extern LoadKernel
 
 section .text
 bits 64
@@ -30,5 +30,5 @@ os64load:
     mov fs, ax
     mov gs, ax
 
-    call load_kernel
+    call LoadKernel
     hlt
