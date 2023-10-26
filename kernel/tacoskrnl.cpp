@@ -32,7 +32,7 @@ extern "C" void LoadKernel() {
     clear_screen();
     
     VgaTextMode VgaTm;
-    VgaTm.BufferWrite("Hello World! This Function works Properly!");
+    VgaTm.BufferWrite("Hello World! This Function works Properly!", VgaColor::WHITE, VgaColor::RED);
 
     while(1 == 1) {
         /* Prevent Exit */

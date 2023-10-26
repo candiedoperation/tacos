@@ -5,10 +5,10 @@ LD_PARAMETERS = -n
 
 #Other Variables  $(BUILD_PATH)/kernel.o
 BUILD_PATH = build
-KRNL_DEPENDENCIES = $(BUILD_PATH)/src/osloader/osloader.o \
-					$(BUILD_PATH)/src/osloader/os64loader.o \
-					$(BUILD_PATH)/src/drivers/video/vga.o \
-					$(BUILD_PATH)/src/kernel/tacoskrnl.o
+KRNL_DEPENDENCIES = $(BUILD_PATH)/osloader/osloader.o \
+					$(BUILD_PATH)/osloader/os64loader.o \
+					$(BUILD_PATH)/drivers/video/vga.o \
+					$(BUILD_PATH)/kernel/tacoskrnl.o
 
 #Define PHONY
 .PHONY = run run-debug clean

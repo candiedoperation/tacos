@@ -33,7 +33,7 @@ VgaTextMode::VgaTextMode()
 void VgaTextMode::BufferWrite(char *buffer)
 {
     /* Use Default Colors */
-    BufferWrite(buffer, VgaColor::GREEN, VgaColor::BLUE);
+    BufferWrite(buffer, VgaColor::WHITE, VgaColor::BLACK);
 }
 
 void VgaTextMode::BufferWrite(char *buffer, VgaColor FgColor, VgaColor BgColor)
