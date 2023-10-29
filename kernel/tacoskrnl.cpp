@@ -17,8 +17,10 @@
 */
 
 #include <drivers/video/vga.hpp>
+#include <kernel/interrupt.hpp>
 
 using namespace tacos::Drivers::Video;
+using namespace tacos::Kernel;
 
 void clear_screen() {
     unsigned short* vm = (unsigned short*) 0xb8000;
@@ -30,9 +32,14 @@ void clear_screen() {
 extern "C" void LoadKernel() {
     /* Kernel Entrypoint */
     clear_screen();
-    
+
     VgaTextMode VgaTm;
     VgaTm.BufferWrite("Hello World! This Function works Properly!", VgaColor::WHITE, VgaColor::RED);
+
+    Interrupt Intr;
+    Intr.Register();
+
+    //int DivByZ = 1/0;
 
     while(1 == 1) {
         /* Prevent Exit */

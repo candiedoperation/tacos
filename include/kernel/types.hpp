@@ -16,15 +16,19 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef TACOS_TYPES_HPP
-#define TACOS_TYPES_HPP
+#ifndef KERNEL_TYPES_HPP
+#define KERNEL_TYPES_HPP
 
 namespace tacos {
     namespace Kernel {
-        typedef unsigned char Byte;
-        typedef unsigned short Word;
-        typedef unsigned int Dword;
-        typedef unsigned long long int Qword;
+        typedef unsigned char BYTE;
+        typedef unsigned short WORD;
+        typedef unsigned int DWORD;
+        typedef unsigned long long int QWORD;
+
+        typedef signed char INT8;
+        typedef signed short INT16;
+        typedef signed int INT32;
     }
 }
 

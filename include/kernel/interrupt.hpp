@@ -16,35 +16,40 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <kernel/types.hpp>
-#include <drivers/video/vga.hpp>
+#ifndef KERNEL_INTERRUPT_HPP
+#define KERNEL_INTERRUPT_HPP
 
-using namespace tacos::Drivers::Video;
+#include <kernel/types.hpp>
+
 using namespace tacos::Kernel;
 
-VgaTextMode::VgaTextMode()
-{
-    Buffer.MemoryAddress = (BYTE *)0xB8000;
-    Buffer.ScreenWidth = 80;
-    Buffer.ScreenHeight = 25;
-    Buffer.CursorPos = 0;
-}
+namespace tacos {
+    namespace Kernel {
+        class Interrupt {
+            struct IdTableEntry {
+                WORD IsrLow;
+                WORD KernelCs;
+                BYTE Ist;
+                BYTE Attributes;
+                WORD IsrMid;
+                DWORD IsrHigh;
+                DWORD Reserved;
+            };
 
-void VgaTextMode::BufferWrite(char *buffer)
-{
-    /* Use Default Colors */
-    BufferWrite(buffer, VgaColor::WHITE, VgaColor::BLACK);
-}
+            struct IdTableRegister {
+                WORD limit;
+                QWORD base;
+            };
 
-void VgaTextMode::BufferWrite(char *buffer, VgaColor FgColor, VgaColor BgColor)
-{
-    for (int i = 0; buffer[i] != '\0'; i++)
-    {
-        BYTE TextProperties = ((BYTE) BgColor << 4) | ((BYTE) FgColor);
-        Buffer.MemoryAddress[Buffer.CursorPos] = buffer[i];
-        Buffer.MemoryAddress[Buffer.CursorPos + 1] = TextProperties;
+            /* Define Interrupt Descriptor Table */
+            static IdTableEntry IdTable[256]; // Static, present till halt
+            static IdTableRegister Idtr;
 
-        /* Move Memory Position */
-        Buffer.CursorPos += 2;
+            public:
+                void Register();
+                static void IntDivByZero();
+        };
     }
 }
+
+#endif

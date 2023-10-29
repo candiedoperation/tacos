@@ -48,10 +48,10 @@ namespace tacos
             };
 
             struct VgaBuffer {
-                Byte ScreenWidth;
-                Byte ScreenHeight;
-                Byte* MemoryAddress;
-                Word CursorPos;
+                BYTE ScreenWidth;
+                BYTE ScreenHeight;
+                BYTE* MemoryAddress;
+                WORD CursorPos;
             };
 
             class VgaTextMode {
