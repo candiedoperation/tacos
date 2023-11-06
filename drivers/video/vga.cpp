@@ -40,6 +40,12 @@ void VgaTextMode::BufferWrite(char *buffer, VgaColor FgColor, VgaColor BgColor)
 {
     for (int i = 0; buffer[i] != '\0'; i++)
     {
+        if (buffer[i] == '\n') {
+            int CurrentLine = ((int) (Buffer.CursorPos * Buffer.ScreenHeight)/(Buffer.ScreenHeight * Buffer.ScreenWidth)) + 1;
+            Buffer.CursorPos += (CurrentLine + 1) * Buffer.ScreenWidth;
+            i++; /* Don't print \n */
+        }
+
         BYTE TextProperties = ((BYTE) BgColor << 4) | ((BYTE) FgColor);
         Buffer.MemoryAddress[Buffer.CursorPos] = buffer[i];
         Buffer.MemoryAddress[Buffer.CursorPos + 1] = TextProperties;

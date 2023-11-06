@@ -8,6 +8,7 @@ BUILD_PATH = build
 KRNL_DEPENDENCIES = $(BUILD_PATH)/osloader/osloader.o \
 					$(BUILD_PATH)/osloader/os64loader.o \
 					$(BUILD_PATH)/drivers/video/vga.o \
+					$(BUILD_PATH)/kernel/gdt.o \
 					$(BUILD_PATH)/kernel/interrupt.o \
 					$(BUILD_PATH)/kernel/tacoskrnl.o
 
@@ -49,7 +50,8 @@ run: $(BUILD_PATH)/tacos.iso
 	qemu-system-x86_64 -cdrom $(BUILD_PATH)/tacos.iso
 
 run-debug: $(BUILD_PATH)/tacos.iso
-	qemu-system-x86_64 -cdrom $(BUILD_PATH)/tacos.iso -d int -no-reboot -no-shutdown
+	qemu-system-x86_64  -s -S -cdrom $(BUILD_PATH)/tacos.iso
+	echo "-d int -no-reboot -no-shutdown"
 
 clean:
 	rm -rf $(BUILD_PATH)/

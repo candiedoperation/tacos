@@ -25,29 +25,38 @@ using namespace tacos::Kernel;
 
 namespace tacos {
     namespace Kernel {
+        #define DEFINE_INTERRUPT(x) extern "C" void HandleInterrupt##x() { HandleInterrupt(x); }
+        #define CREATE_INTERRUPT(x) \
+            idt = &IdTable[x]; \
+            idt->IsrLow = ((QWORD) &HandleInterrupt##x) & 0xFFFF; \
+            idt->KernelCs = 0x08; \
+            idt->Ist = 0; \
+            idt->Attributes = 0x8e; \
+            idt->IsrMid = ((QWORD) &HandleInterrupt##x >> 16) & 0xFFFF; \
+            idt->IsrHigh = ((QWORD) &HandleInterrupt##x >> 32) & 0xFFFFFFFF; \
+            idt->Reserved = 0;
+
+        /* Define Main Interrupt Handler */
+        extern "C" void HandleInterrupt(int Code);
+
         class Interrupt {
-            struct IdTableEntry {
-                WORD IsrLow;
-                WORD KernelCs;
-                BYTE Ist;
-                BYTE Attributes;
-                WORD IsrMid;
-                DWORD IsrHigh;
-                DWORD Reserved;
-            };
-
-            struct IdTableRegister {
-                WORD limit;
-                QWORD base;
-            };
-
-            /* Define Interrupt Descriptor Table */
-            static IdTableEntry IdTable[256]; // Static, present till halt
-            static IdTableRegister Idtr;
-
             public:
+                struct IdTableEntry {
+                    WORD IsrLow;
+                    WORD KernelCs;
+                    BYTE Ist;
+                    BYTE Attributes;
+                    WORD IsrMid;
+                    DWORD IsrHigh;
+                    DWORD Reserved;
+                } __attribute__((packed));
+
+                struct IdTableRegister {
+                    WORD limit;
+                    QWORD base;
+                } __attribute__((packed));
+                
                 void Register();
-                static void IntDivByZero();
         };
     }
 }

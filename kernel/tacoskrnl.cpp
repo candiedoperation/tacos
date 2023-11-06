@@ -34,12 +34,13 @@ extern "C" void LoadKernel() {
     clear_screen();
 
     VgaTextMode VgaTm;
-    VgaTm.BufferWrite("Hello World! This Function works Properly!", VgaColor::WHITE, VgaColor::RED);
+    VgaTm.BufferWrite("Hello World! This Function works Properly!", VgaColor::WHITE, VgaColor::GREEN);
 
     Interrupt Intr;
     Intr.Register();
 
-    //int DivByZ = 1/0;
+    /* Check if Interrupts Work! */
+    int DivByZ = 1/0;
 
     while(1 == 1) {
         /* Prevent Exit */

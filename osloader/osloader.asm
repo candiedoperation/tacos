@@ -176,7 +176,7 @@ memory_paging:
     ; Map each PD Table entry to a 2MB Page
     mov ecx, 0
     map_pd:
-        mov eax, 0x200000 ; Define 2MB
+        mov eax, 0x200000
         mul ecx ; ecx -> source, eax -> destination (implied)
         or eax, 0b10000011 ; present + writable + huge
         mov [pd_table + (ecx * 8)], eax
