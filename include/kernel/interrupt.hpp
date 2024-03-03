@@ -23,46 +23,48 @@
 
 using namespace tacos::Kernel;
 
+#define DEFINE_INTERRUPT(x) \
+    extern "C" void HandleInterrupt##x() { HandleInterrupt(x); }
+
+#define CREATE_INTERRUPT(x)                                         \
+    idt = &IdTable[x];                                              \
+    idt->IsrLow = ((u64) & HandleInterrupt##x) & 0xFFFF;            \
+    idt->KernelCs = 0x08;                                           \
+    idt->Ist = 0;                                                   \
+    idt->Attributes = 0x8e;                                         \
+    idt->IsrMid = ((u64) & HandleInterrupt##x >> 16) & 0xFFFF;      \
+    idt->IsrHigh = ((u64) & HandleInterrupt##x >> 32) & 0xFFFFFFFF; \
+    idt->Reserved = 0;
+
 namespace tacos {
-    namespace Kernel {
-        #define DEFINE_INTERRUPT(x) extern "C" void HandleInterrupt##x() { HandleInterrupt(x); }
-        #define CREATE_INTERRUPT(x) \
-            idt = &IdTable[x]; \
-            idt->IsrLow = ((QWORD) &HandleInterrupt##x) & 0xFFFF; \
-            idt->KernelCs = 0x08; \
-            idt->Ist = 0; \
-            idt->Attributes = 0x8e; \
-            idt->IsrMid = ((QWORD) &HandleInterrupt##x >> 16) & 0xFFFF; \
-            idt->IsrHigh = ((QWORD) &HandleInterrupt##x >> 32) & 0xFFFFFFFF; \
-            idt->Reserved = 0;
+namespace Kernel {
+    /* Define Main Interrupt Handler */
+    extern "C" void HandleInterrupt(int Code);
 
-        /* Define Main Interrupt Handler */
-        extern "C" void HandleInterrupt(int Code);
+    class Interrupt {
+    public:
+        struct IdTableEntry {
+            u16 IsrLow;
+            u16 KernelCs;
+            char Ist;
+            char Attributes;
+            u16 IsrMid;
+            u32 IsrHigh;
+            u32 Reserved;
+        } __attribute__((packed));
 
-        class Interrupt {
-            public:
-                struct IdTableEntry {
-                    WORD IsrLow;
-                    WORD KernelCs;
-                    char Ist;
-                    char Attributes;
-                    WORD IsrMid;
-                    DWORD IsrHigh;
-                    DWORD Reserved;
-                } __attribute__((packed));
+        struct IdTableRegister {
+            u16 limit;
+            u64 base;
+        } __attribute__((packed));
 
-                struct IdTableRegister {
-                    WORD limit;
-                    QWORD base;
-                } __attribute__((packed));
-                
-                static void Register();
-                static void HandleDivByZeroException();
-                static void HandleDoubleFaultException();
-                static void HandlePageFaultException();
-                static void UnhandledException(int Code);
-        };
-    }
+        static void Register();
+        static void HandleDivByZeroException();
+        static void HandleDoubleFaultException();
+        static void HandlePageFaultException();
+        static void UnhandledException(int Code);
+    };
+}
 }
 
 #endif

@@ -22,30 +22,32 @@
 using namespace tacos::Drivers::Video;
 using namespace tacos::Kernel;
 
-void clear_screen() {
-    unsigned short* vm = (unsigned short*) 0xb8000;
+void clear_screen()
+{
+    unsigned short* vm = (unsigned short*)0xb8000;
     for (int i = 0; i < 2000; i++) {
-        vm[i] = ((unsigned short) 0x0f << 8) | 0x00;
+        vm[i] = ((unsigned short)0x0f << 8) | 0x00;
     }
 }
 
-extern "C" void LoadKernel() {
+extern "C" void LoadKernel()
+{
     /* Kernel Entrypoint */
     clear_screen();
 
-    VgaTextMode::BufferWrite("Hello World! This Function works Properly!\n", VgaColor::WHITE, VgaColor::GREEN);
+    VgaTextMode::BufferWrite("Hello World! This Function works Properly!\n", vga_color::WHITE, vga_color::GREEN);
 
     Interrupt::Register();
 
     /* Check if Interrupts Work! */
-    //int DivByZ = 1/0;
-    //int DivByZ2 = 1/0;
+    int DivByZ = 1 / 0;
+    // int DivByZ2 = 1/0;
 
     /* Write to an Invalid Memory Address */
     char* InvalidAddr = (char*)0x8deadbeef;
-    //InvalidAddr[2] = 65;
+    // InvalidAddr[2] = 65;
 
-    while(1 == 1) {
+    while (1 == 1) {
         /* Prevent Exit */
     }
 }
