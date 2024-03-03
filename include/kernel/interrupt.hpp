@@ -44,8 +44,8 @@ namespace tacos {
                 struct IdTableEntry {
                     WORD IsrLow;
                     WORD KernelCs;
-                    BYTE Ist;
-                    BYTE Attributes;
+                    char Ist;
+                    char Attributes;
                     WORD IsrMid;
                     DWORD IsrHigh;
                     DWORD Reserved;
@@ -56,7 +56,11 @@ namespace tacos {
                     QWORD base;
                 } __attribute__((packed));
                 
-                void Register();
+                static void Register();
+                static void HandleDivByZeroException();
+                static void HandleDoubleFaultException();
+                static void HandlePageFaultException();
+                static void UnhandledException(int Code);
         };
     }
 }

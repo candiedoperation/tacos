@@ -8,7 +8,6 @@ BUILD_PATH = build
 KRNL_DEPENDENCIES = $(BUILD_PATH)/osloader/osloader.o \
 					$(BUILD_PATH)/osloader/os64loader.o \
 					$(BUILD_PATH)/drivers/video/vga.o \
-					$(BUILD_PATH)/kernel/gdt.o \
 					$(BUILD_PATH)/kernel/interrupt.o \
 					$(BUILD_PATH)/kernel/tacoskrnl.o
 

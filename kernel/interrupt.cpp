@@ -22,10 +22,11 @@
 using namespace tacos::Drivers::Video;
 using namespace tacos::Kernel;
 
-namespace tacos {
-    namespace Kernel {
-        __attribute__ ((aligned(0x10)))
-        static Interrupt::IdTableEntry IdTable[256]; // Static, present till halt
+namespace tacos
+{
+    namespace Kernel
+    {
+        __attribute__((aligned(0x10))) static Interrupt::IdTableEntry IdTable[256]; // Static, present till halt
         static Interrupt::IdTableRegister Idtr;
 
         /* Define Interrupts */
@@ -60,11 +61,12 @@ namespace tacos {
         DEFINE_INTERRUPT(29);
         DEFINE_INTERRUPT(30);
         DEFINE_INTERRUPT(31);
-        DEFINE_INTERRUPT(32); 
+        DEFINE_INTERRUPT(32);
 
-        void Interrupt::Register() {
+        void Interrupt::Register()
+        {
             /* IDT Init */
-            Idtr.base = (QWORD) &IdTable[0];
+            Idtr.base = (QWORD)&IdTable[0];
             Idtr.limit = sizeof(IdTable);
 
             IdTableEntry *idt;
@@ -99,21 +101,71 @@ namespace tacos {
             CREATE_INTERRUPT(29);
             CREATE_INTERRUPT(30);
             CREATE_INTERRUPT(31);
-            CREATE_INTERRUPT(32); 
+            CREATE_INTERRUPT(32);
 
-            __asm__ __volatile__ ("lidt %0" : : "m"(Idtr));
-            __asm__ __volatile__ ("sti"); // set the interrupt flag
+            /*
+                __asm__ executes traditional assembly block. Does not use GNU Ex
+                -tensions or extended assembly. (GCC asm() and asm(:))
+                https://wiki.osdev.org/Inline_Assembly/Examples
 
-            VgaTextMode VgaTm;
-            VgaTm.BufferWrite("Registered for Exceptions!");
+                __volatile__ is a addon to __asm__ that ensures that compiler
+                optimizations do not remove the assembly instructions.
+            */
+
+            __asm__ __volatile__("lidt %0" : : "m"(Idtr));
+            __asm__ __volatile__("sti"); // set the interrupt flag
+
+            VgaTextMode::BufferWrite("Registered for Exceptions!\n", VgaColor::WHITE, VgaColor::GREEN);
         }
 
-        extern "C" void HandleInterrupt(int Code) {
-            char* exception = "Exeception   occured!";
-            exception[11] = (48 + Code);
+        extern "C" void HandleInterrupt(int Code)
+        {
+            switch (Code)
+            {
+            case 0:
+                Interrupt::HandleDivByZeroException();
+                break;
 
-            VgaTextMode VgaTm;
-            VgaTm.BufferWrite(exception, VgaColor::WHITE, VgaColor::RED);
+            case 8:
+                Interrupt::HandleDoubleFaultException();
+                break;
+
+            case 14:
+                Interrupt::HandlePageFaultException();
+                break;
+
+            default:
+                Interrupt::UnhandledException(Code);
+                break;
+            }
+        }
+
+        void Interrupt::HandleDivByZeroException()
+        {
+            VgaTextMode::BufferWrite("Divide By Zero Exception!\n");
+        }
+
+        void Interrupt::HandleDoubleFaultException()
+        {
+            VgaTextMode::BufferWrite("Double Fault Occured!");
+            __asm__ __volatile__("cli; hlt");
+        }
+
+        void Interrupt::HandlePageFaultException()
+        {
+            VgaTextMode::BufferWrite("Page Fault Exception!");
+            __asm__ __volatile__("cli; hlt");
+        }
+
+        void Interrupt::UnhandledException(int Code)
+        {
+            /* Define Exception String */
+            char *exception = "Unhandled Exception  \n";
+            exception[20] = (65 + Code);
+
+            /* Write Exception Output and Halt CPU */
+            VgaTextMode::BufferWrite(exception);
+            __asm__ __volatile__("cli; hlt");
         }
     }
 }

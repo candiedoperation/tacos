@@ -47,21 +47,16 @@ namespace tacos
                 WHITE = 0xf
             };
 
-            struct VgaBuffer {
-                BYTE ScreenWidth;
-                BYTE ScreenHeight;
-                BYTE* MemoryAddress;
-                WORD CursorPos;
-            };
-
             class VgaTextMode {
                 private:
-                    VgaBuffer Buffer;
+                    static BYTE ScreenWidth;
+                    static BYTE ScreenHeight;
+                    static BYTE* MemoryAddress;
+                    static WORD CursorPos;
 
                 public:
-                    VgaTextMode();
-                    void BufferWrite(char* buffer);
-                    void BufferWrite(char* buffer, VgaColor FgColor, VgaColor BgColor);
+                    static void BufferWrite(char* buffer);
+                    static void BufferWrite(char* buffer, VgaColor FgColor, VgaColor BgColor);
             };
         }
     }

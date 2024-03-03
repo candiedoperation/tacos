@@ -22,13 +22,11 @@
 using namespace tacos::Drivers::Video;
 using namespace tacos::Kernel;
 
-VgaTextMode::VgaTextMode()
-{
-    Buffer.MemoryAddress = (BYTE *)0xB8000;
-    Buffer.ScreenWidth = 80;
-    Buffer.ScreenHeight = 25;
-    Buffer.CursorPos = 0;
-}
+/* Initialize the Static VGA Buffer Addresses */
+BYTE *VgaTextMode::MemoryAddress = (BYTE *)0xB8000;
+BYTE VgaTextMode::ScreenWidth = 80;
+BYTE VgaTextMode::ScreenHeight = 25;
+WORD VgaTextMode::CursorPos = 0;
 
 void VgaTextMode::BufferWrite(char *buffer)
 {
@@ -40,17 +38,21 @@ void VgaTextMode::BufferWrite(char *buffer, VgaColor FgColor, VgaColor BgColor)
 {
     for (int i = 0; buffer[i] != '\0'; i++)
     {
-        if (buffer[i] == '\n') {
-            int CurrentLine = ((int) (Buffer.CursorPos * Buffer.ScreenHeight)/(Buffer.ScreenHeight * Buffer.ScreenWidth)) + 1;
-            Buffer.CursorPos += (CurrentLine + 1) * Buffer.ScreenWidth;
-            i++; /* Don't print \n */
+        if (buffer[i] == '\n')
+        {
+            /* Set Cursor Positions for Next Line */
+            int currentLine = ((int)(CursorPos / ScreenWidth)) + 1;
+            CursorPos = (currentLine * (ScreenWidth));
+
+            /* Don't Print \n */
+            continue;
         }
 
-        BYTE TextProperties = ((BYTE) BgColor << 4) | ((BYTE) FgColor);
-        Buffer.MemoryAddress[Buffer.CursorPos] = buffer[i];
-        Buffer.MemoryAddress[Buffer.CursorPos + 1] = TextProperties;
+        BYTE TextProperties = ((BYTE)BgColor << 4) | ((BYTE)FgColor);
+        MemoryAddress[CursorPos] = buffer[i];
+        MemoryAddress[CursorPos + 1] = TextProperties;
 
         /* Move Memory Position */
-        Buffer.CursorPos += 2;
+        CursorPos += 2;
     }
 }
