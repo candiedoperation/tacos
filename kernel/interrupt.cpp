@@ -20,8 +20,9 @@
 #include <drivers/video/vga.hpp>
 #include <kernel/interrupt.hpp>
 
-using namespace tacos::Drivers::Video;
 using namespace tacos::Kernel;
+using namespace tacos::Drivers::HAL;
+using namespace tacos::Drivers::Video;
 
 namespace tacos {
 namespace Kernel {
@@ -60,7 +61,24 @@ namespace Kernel {
     DEFINE_INTERRUPT(29);
     DEFINE_INTERRUPT(30);
     DEFINE_INTERRUPT(31);
+
+    /* Define PIC Interrupts */
     DEFINE_INTERRUPT(32);
+    DEFINE_INTERRUPT(33);
+    DEFINE_INTERRUPT(34);
+    DEFINE_INTERRUPT(35);
+    DEFINE_INTERRUPT(36);
+    DEFINE_INTERRUPT(37);
+    DEFINE_INTERRUPT(38);
+    DEFINE_INTERRUPT(39);
+    DEFINE_INTERRUPT(40);
+    DEFINE_INTERRUPT(41);
+    DEFINE_INTERRUPT(42);
+    DEFINE_INTERRUPT(43);
+    DEFINE_INTERRUPT(44);
+    DEFINE_INTERRUPT(45);
+    DEFINE_INTERRUPT(46);
+    DEFINE_INTERRUPT(47);
 
     void Interrupt::Register()
     {
@@ -102,6 +120,24 @@ namespace Kernel {
         CREATE_INTERRUPT(31);
         CREATE_INTERRUPT(32);
 
+        /* Create PIC Interrupts */
+        CREATE_INTERRUPT(32);
+        CREATE_INTERRUPT(33);
+        CREATE_INTERRUPT(34);
+        CREATE_INTERRUPT(35);
+        CREATE_INTERRUPT(36);
+        CREATE_INTERRUPT(37);
+        CREATE_INTERRUPT(38);
+        CREATE_INTERRUPT(39);
+        CREATE_INTERRUPT(40);
+        CREATE_INTERRUPT(41);
+        CREATE_INTERRUPT(42);
+        CREATE_INTERRUPT(43);
+        CREATE_INTERRUPT(44);
+        CREATE_INTERRUPT(45);
+        CREATE_INTERRUPT(46);
+        CREATE_INTERRUPT(47);
+
         /*
             __asm__ executes traditional assembly block. Does not use GNU Ex
             -tensions or extended assembly. (GCC asm() and asm(:))
@@ -111,8 +147,11 @@ namespace Kernel {
             optimizations do not remove the assembly instructions.
         */
 
-        __asm__ __volatile__("lidt %0" : : "m"(Idtr));
-        __asm__ __volatile__("sti"); // set the interrupt flag
+        __asm__ volatile("lidt %0" : : "m"(Idtr));
+
+        /* Initialize PIC and Set Interrupt Flag */
+        Pic8259::Initialize();
+        __asm__ volatile("sti");
 
         VgaTextMode::BufferWrite("Registered for Exceptions!\n", vga_color::WHITE, vga_color::GREEN);
     }
@@ -130,6 +169,11 @@ namespace Kernel {
 
         case 14:
             Interrupt::HandlePageFaultException();
+            break;
+
+        case 32:
+            VgaTextMode::BufferWrite(".");
+            Pic8259::EndOfInterrupt(Code);
             break;
 
         default:

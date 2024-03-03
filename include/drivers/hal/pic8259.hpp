@@ -19,6 +19,9 @@
 #ifndef DRIVERS_HAL_PIC8259_HPP
 #define DRIVERS_HAL_PIC8259_HPP
 
+#include <kernel/types.hpp>
+using namespace tacos::Kernel;
+
 #define PIC8259_INIT 0x11 /* PIC Initialization Instruction */
 #define PIC8259_EOI 0x20 /* End of Interrupt Acknowledgement */
 #define PIC8259_ICW1_ICW4 0x01 /* ICW1 message: ICW4 Will Be Present */
@@ -37,20 +40,18 @@
 */
 
 #define PIC8259_MASTER 0x0020
-#define PIC8259_MASTER_DATA (PIC8259_MASTER + 1)
+#define PIC8259_MASTER_DATA 0x0021
 
 #define PIC8259_SLAVE 0x00A0
-#define PIC8259_SLAVE_DATA (PIC8259_SLAVE + 1)
+#define PIC8259_SLAVE_DATA 0x00A1
 
 namespace tacos {
 namespace Drivers {
     namespace HAL {
         class Pic8259 {
-        private:
-            static void remap();
-
         public:
-            static void initialize();
+            static void Initialize();
+            static void EndOfInterrupt(u8 Code);
         };
     }
 }

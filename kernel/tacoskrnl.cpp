@@ -40,11 +40,11 @@ extern "C" void LoadKernel()
     Interrupt::Register();
 
     /* Check if Interrupts Work! */
-    int DivByZ = 1 / 0;
+    //int DivByZ = 1 / 0;
     // int DivByZ2 = 1/0;
 
     /* Write to an Invalid Memory Address */
-    char* InvalidAddr = (char*)0x8deadbeef;
+    //char* InvalidAddr = (char*)0x8deadbeef;
     // InvalidAddr[2] = 65;
 
     while (1 == 1) {

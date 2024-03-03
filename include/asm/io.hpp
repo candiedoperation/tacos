@@ -28,6 +28,12 @@ namespace ASM {
     /// @brief Contains x86 Assembly Helpers Interrupt Operations
     class IO {
     public:
+        /*
+            Inline functions are defined in the header file as they
+            expand at the location they're called. This makes reduce
+            the call times significantly when they're rapidly called.
+        */
+
         /// @brief Sends a Byte as an output to a port
         /// @param port Defines the Output Port
         /// @param output Defines the Output Message (1 byte)
