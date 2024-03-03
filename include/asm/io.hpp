@@ -28,9 +28,42 @@ namespace ASM {
     /// @brief Contains x86 Assembly Helpers Interrupt Operations
     class IO {
     public:
-        static inline void outb(u16 port, u8 output);
-        static inline u8 inb(u16 port);
-        static inline void wait();
+        /// @brief Sends a Byte as an output to a port
+        /// @param port Defines the Output Port
+        /// @param output Defines the Output Message (1 byte)
+        static inline void outb(u16 port, u8 output)
+        {
+            __asm__ volatile(
+                "outb %b0, %w1" // Assembly instruction to perform output
+                : /* Output operands (none in this case) */
+                : "a"(output), "Nd"(port) /* Input operands: "a" indicates eax, "N" picks a suitable register */
+                : "memory" /* Informs the compiler about potential memory changes, Prevents optimizations */
+            );
+        }
+
+        /// @brief Recevies a Byte as input from a port
+        /// @param port Defines Input Port
+        /// @return Byte read from the Port
+        static inline u8 inb(u16 port)
+        {
+            u8 input;
+            __asm__ volatile(
+                "inb %w1, %b0" /* Assembly instruction to perform input */
+                : "=a"(input) /* Output operand, Uses eax, sets to input */
+                : "Nd"(port) /* Input operand */
+                : "memory" /* Informs the compiler about potential memory changes */
+            );
+
+            /* Return Received Value */
+            return input;
+        }
+
+        /// @brief Delay Timer that takes 1 to 4 microseconds.
+        static inline void wait()
+        {
+            /* Writes Gibberish to a port 0x80 */
+            outb(0x80, 0);
+        }
     };
 }
 } // namespace tacos
