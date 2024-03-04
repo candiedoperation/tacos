@@ -16,6 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <asm/io.hpp>
 #include <drivers/hal/pic8259.hpp>
 #include <drivers/video/vga.hpp>
 #include <kernel/interrupt.hpp>
@@ -23,6 +24,7 @@
 using namespace tacos::Kernel;
 using namespace tacos::Drivers::HAL;
 using namespace tacos::Drivers::Video;
+using namespace tacos::ASM;
 
 namespace tacos {
 namespace Kernel {
@@ -118,7 +120,6 @@ namespace Kernel {
         CREATE_INTERRUPT(29);
         CREATE_INTERRUPT(30);
         CREATE_INTERRUPT(31);
-        CREATE_INTERRUPT(32);
 
         /* Create PIC Interrupts */
         CREATE_INTERRUPT(32);
@@ -176,10 +177,20 @@ namespace Kernel {
             Pic8259::EndOfInterrupt(Code);
             break;
 
+        case 33:
+            Interrupt::HandleKeyboardInterrupt();
+            break;
+
         default:
             Interrupt::UnhandledException(Code);
             break;
         }
+    }
+
+    void Interrupt::HandleKeyboardInterrupt() {
+            char key = IO::inb(0x60);
+            VgaTextMode::BufferWrite("k");
+            Pic8259::EndOfInterrupt(33);
     }
 
     void Interrupt::HandleDivByZeroException()

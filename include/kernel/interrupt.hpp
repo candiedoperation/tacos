@@ -62,6 +62,7 @@ namespace Kernel {
         static void HandleDivByZeroException();
         static void HandleDoubleFaultException();
         static void HandlePageFaultException();
+        static void HandleKeyboardInterrupt();
         static void UnhandledException(int Code);
     };
 }

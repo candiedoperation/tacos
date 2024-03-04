@@ -40,14 +40,15 @@ extern "C" void LoadKernel()
     Interrupt::Register();
 
     /* Check if Interrupts Work! */
-    //int DivByZ = 1 / 0;
-    // int DivByZ2 = 1/0;
+    // int DivByZ = 1 / 0;
+    //  int DivByZ2 = 1/0;
 
-    /* Write to an Invalid Memory Address */
-    //char* InvalidAddr = (char*)0x8deadbeef;
-    // InvalidAddr[2] = 65;
+    for (;;) {
+        /*
+            Halt CPU till next Interrupt. This Prevents 100% 
+            CPU Utilization and improves efficiency.
+        */
 
-    while (1 == 1) {
-        /* Prevent Exit */
+        __asm__ volatile("hlt");
     }
 }

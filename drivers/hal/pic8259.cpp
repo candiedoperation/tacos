@@ -85,8 +85,8 @@ void Pic8259::Initialize()
         Page 12, https://pdos.csail.mit.edu/6.828/2005/readings/hardware/8259A.pdf
     */
 
-    const u8 MASTER_ICW3 = 0b00001000; /* Slave at 3rd IRQ */
-    const u8 SLAVE_ICW3 = 0b00000011; /* Slave ID is 3 */
+    const u8 MASTER_ICW3 = 0b00000100; /* Slave at 2rd IRQ */
+    const u8 SLAVE_ICW3 = 0b00000010; /* Slave ID is 2 */
     IO::outb(PIC8259_MASTER_DATA, MASTER_ICW3);
     IO::wait();
     IO::outb(PIC8259_SLAVE_DATA, SLAVE_ICW3);
@@ -99,8 +99,8 @@ void Pic8259::Initialize()
     IO::wait();
 
     /* Restore the Masks in Both PICs. Then, they're ready for interrupts */
-    IO::outb(PIC8259_MASTER, mask01);
-    IO::outb(PIC8259_SLAVE, mask02);
+    IO::outb(PIC8259_MASTER_DATA, 0xfe); // Take Just Keyboard inputs now.
+    IO::outb(PIC8259_SLAVE_DATA, 0xff);
 }
 
 /// @brief Sends EOI Acknowledgement after every Interrupt.
@@ -115,8 +115,8 @@ void Pic8259::EndOfInterrupt(u8 Code)
         If the IRQ is from the slave, send it to both Master and Slave.
     */
 
-    if (Code > 39)
-        IO::outb(PIC8259_SLAVE, PIC8259_EOI);
+    //if (Code >= 40)
+    //    IO::outb(PIC8259_SLAVE, PIC8259_EOI);
 
     IO::outb(PIC8259_MASTER, PIC8259_EOI);
 }
