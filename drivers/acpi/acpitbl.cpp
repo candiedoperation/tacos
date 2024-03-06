@@ -22,6 +22,19 @@
 using namespace tacos::Drivers::Acpi;
 using namespace tacos::Drivers::Video;
 
+bool ValidateXsdpSignature(const char* Signature)
+{
+    bool SigValid = true;
+    for (int i = 0; i < sizeof(Signature); i++) {
+        if (Signature[i] != ACPI_RSDP_STR[i]) {
+            SigValid = false;
+            break;
+        }
+    }
+
+    return SigValid;
+}
+
 /// @brief Tries to Find the RSDP Address using the BIOS Search Method
 /// @return RSDP Address Location or 0 (if not found)
 AcpiTable::RSDPAddress GetRSDPAddrBIOS()
@@ -40,19 +53,17 @@ AcpiTable::RSDPAddress GetRSDPAddrBIOS()
        https://github.com/torvalds/linux/blob/master/arch/x86/boot/compressed/acpi.c
    */
 
+    bool FoundSignature = false;
     for (int i = ACPI_BIOS_MEM_STA; i <= ACPI_BIOS_MEM_END; i += 16) {
         const u8* MemBlock = (u8*) ACPI_BIOS_MEM_STA;
-        const AcpiTable::XsdpTable* XsdpTable = (AcpiTable::XsdpTable *) MemBlock;
-        char* str = "TRUE";
-
-        for (int i = 0; i < 8; i++) {
-            if (XsdpTable->Signature[i] != ACPI_RSDP_STR[i])
-                str = "FALSE";
-        }
-
-        VgaTextMode::BufferWrite(str);
-        break;
+        const AcpiTable::XsdpTable* XsdpTable = (AcpiTable::XsdpTable*)MemBlock;
+        FoundSignature = ValidateXsdpSignature(XsdpTable->Signature);
+        if (FoundSignature) break;
     }
+
+    const char* str = (FoundSignature) ? "TRUE" : "FALSE";
+    VgaTextMode::BufferWrite((char*)str);
+
     return 0;
 }
 
