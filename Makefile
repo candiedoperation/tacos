@@ -7,6 +7,7 @@ LD_PARAMETERS = -n
 BUILD_PATH = build
 KRNL_DEPENDENCIES = $(BUILD_PATH)/osloader/osloader.o \
 					$(BUILD_PATH)/osloader/os64loader.o \
+					$(BUILD_PATH)/drivers/acpi/acpitbl.o \
 					$(BUILD_PATH)/drivers/video/vga.o \
 					$(BUILD_PATH)/drivers/hal/pic8259.o \
 					$(BUILD_PATH)/kernel/interrupt.o \

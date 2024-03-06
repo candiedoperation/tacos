@@ -16,10 +16,12 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <drivers/acpi/acpitbl.hpp>
 #include <drivers/video/vga.hpp>
 #include <kernel/interrupt.hpp>
 
 using namespace tacos::Drivers::Video;
+using namespace tacos::Drivers::Acpi;
 using namespace tacos::Kernel;
 
 void clear_screen()
@@ -37,6 +39,7 @@ extern "C" void LoadKernel()
 
     VgaTextMode::BufferWrite("Hello World! This Function works Properly!\n", vga_color::WHITE, vga_color::GREEN);
 
+    AcpiTable::GetRSDPAddr();
     Interrupt::Register();
 
     /* Check if Interrupts Work! */
