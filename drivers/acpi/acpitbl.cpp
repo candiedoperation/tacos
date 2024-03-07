@@ -54,14 +54,14 @@ AcpiTable::RSDPAddress GetRSDPAddrBIOS()
    */
 
     bool FoundSignature = false;
-    for (int i = ACPI_BIOS_MEM_STA; i <= ACPI_BIOS_MEM_END; i += 16) {
-        const u8* MemBlock = (u8*) ACPI_BIOS_MEM_STA;
+    for (int MemLoc = ACPI_BIOS_MEM_STA; MemLoc <= ACPI_BIOS_MEM_END; MemLoc += 16) {
+        const u8* MemBlock = (u8*) MemLoc;
         const AcpiTable::XsdpTable* XsdpTable = (AcpiTable::XsdpTable*)MemBlock;
         FoundSignature = ValidateXsdpSignature(XsdpTable->Signature);
-        if (FoundSignature) break;
+        if (FoundSignature == true) break;
     }
 
-    const char* str = (FoundSignature) ? "TRUE" : "FALSE";
+    const char* str = (FoundSignature) ? "SIG FOUND" : "SIG NOT FOUND";
     VgaTextMode::BufferWrite((char*)str);
 
     return 0;
