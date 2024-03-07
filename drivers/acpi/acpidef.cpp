@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <drivers/acpi/acpitbl.hpp>
+#include <drivers/acpi/acpidef.hpp>
 #include <drivers/video/vga.hpp>
 
 using namespace tacos::Drivers::Acpi;
@@ -37,7 +37,7 @@ bool ValidateXsdpSignature(const char* Signature)
 
 /// @brief Tries to Find the RSDP Address using the BIOS Search Method
 /// @return RSDP Address Location or 0 (if not found)
-AcpiTable::RSDPAddress GetRSDPAddrBIOS()
+AcpiDef::RSDPAddress GetRSDPAddrBIOS()
 {
     /*
        In Non-UEFI Modes:
@@ -56,10 +56,11 @@ AcpiTable::RSDPAddress GetRSDPAddrBIOS()
     /* Probe Memory Regions 0x000E0000 to 0x000FFFFF */
     bool FoundSignature = false;
     for (int MemLoc = ACPI_BIOS_MEM_STA; MemLoc <= ACPI_BIOS_MEM_END; MemLoc += 16) {
-        const u8* MemBlock = (u8*) MemLoc;
-        const AcpiTable::XsdpTable* XsdpTable = (AcpiTable::XsdpTable*)MemBlock;
+        const u8* MemBlock = (u8*)MemLoc;
+        const AcpiDef::XsdpTable* XsdpTable = (AcpiDef::XsdpTable*)MemBlock;
         FoundSignature = ValidateXsdpSignature(XsdpTable->Signature);
-        if (FoundSignature == true) return (AcpiTable::RSDPAddress) MemLoc;
+        if (FoundSignature == true)
+            return (AcpiDef::RSDPAddress)MemLoc;
     }
 
     /* Get Pointer to EBDA and Probe first 1KB */
@@ -69,17 +70,41 @@ AcpiTable::RSDPAddress GetRSDPAddrBIOS()
 
 /// @brief Tries to Find the RSDP Address using the UEFI Table
 /// @return RSDP Address Location or 0 (if not found)
-AcpiTable::RSDPAddress GetRSDPAddrUEFI()
+AcpiDef::RSDPAddress GetRSDPAddrUEFI()
 {
     return 0;
 }
 
 /// @brief Gets the ACPI Root System Description Pointer (RDSP)
 /// @return Pointer to RSD or 0 (if not found)
-AcpiTable::RSDPAddress AcpiTable::GetRSDPAddr()
+AcpiDef::RSDPAddress AcpiDef::GetRSDPAddr()
 {
-    AcpiTable::RSDPAddress RsdpAddr = GetRSDPAddrBIOS();
-    VgaTextMode::BufferWrite((char *) ((RsdpAddr != 0) ? "RSDP Found" : "RSDP Not Found"));
+    /* FIX LATER: USE UEFI GET FUNC IF IN UEFI */
+    return GetRSDPAddrBIOS();
+}
 
-    return 0;
+/// @brief Parses the ACPI Version from RSDP or XSDP
+/// @param XsdpTbl Pointer to RSDP or XSDP
+/// @return ACPI Version Enumerated Type
+AcpiDef::Version AcpiDef::GetACPIVersion(AcpiDef::XsdpTable* XsdpTbl)
+{
+    /*
+        The ACPI Version can be detected using the Revision field in the RSDP.
+        If this field contains 0, then ACPI Version 1.0 is used. For subsequent
+        versions (ACPI version 2.0 to 6.1), the value 2 is used. The exact version
+        of ACPI can be deduced via the FADT table.
+
+        Refer:
+        https://wiki.osdev.org/RSDP#Detecting_ACPI_Version
+    */
+
+    u8 AcpiRevision = XsdpTbl->Revision;
+    if (AcpiRevision == 0)
+        return AcpiDef::Version::ONE;
+    else if (AcpiRevision == 2) {
+        /* FIX LATER: ASSUMING V2.0, PARSE FADT TABLE */
+        return AcpiDef::Version::TWO;
+    }
+
+    return AcpiDef::Version::INVALID;
 }

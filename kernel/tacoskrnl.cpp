@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <drivers/acpi/acpitbl.hpp>
+#include <drivers/acpi/acpidef.hpp>
 #include <drivers/video/vga.hpp>
 #include <kernel/interrupt.hpp>
 
@@ -32,15 +32,41 @@ void clear_screen()
     }
 }
 
+void init_acpi()
+{
+    AcpiDef::RSDPAddress RsdpAddr = AcpiDef::GetRSDPAddr();
+    if (RsdpAddr != 0) {
+        AcpiDef::XsdpTable* XsdpTable = (AcpiDef::XsdpTable*)RsdpAddr;
+        switch (AcpiDef::GetACPIVersion(XsdpTable)) {
+        case AcpiDef::ONE: {
+            VgaTextMode::BufferWrite("ACPI Version 1.0\n");
+            break;
+        }
+
+        case AcpiDef::TWO: {
+            VgaTextMode::BufferWrite("ACPI Version 2.0\n");
+            break;
+        }
+
+        default: {
+            VgaTextMode::BufferWrite("Invalid ACPI Version\n");
+            break;
+        }
+        }
+    } else {
+        VgaTextMode::BufferWrite("ACPI Not Supported");
+        asm volatile ("cli; hlt");
+    }
+}
+
 extern "C" void LoadKernel()
 {
     /* Kernel Entrypoint */
     clear_screen();
 
-    VgaTextMode::BufferWrite("Hello World! This Function works Properly!\n", vga_color::WHITE, vga_color::GREEN);
-    VgaTextMode::BufferWrite("Hellow!");
+    VgaTextMode::BufferWrite("tacOS Kernel Initializing...\n", vga_color::YELLOW, vga_color::BLACK);
 
-    AcpiTable::GetRSDPAddr();
+    init_acpi();
     Interrupt::Register();
 
     /* Check if Interrupts Work! */
@@ -49,7 +75,7 @@ extern "C" void LoadKernel()
 
     for (;;) {
         /*
-            Halt CPU till next Interrupt. This Prevents 100% 
+            Halt CPU till next Interrupt. This Prevents 100%
             CPU Utilization and improves efficiency.
         */
 

@@ -31,9 +31,18 @@ using namespace tacos::Kernel;
 namespace tacos {
 namespace Drivers {
     namespace Acpi {
-        class AcpiTable {
+        class AcpiDef {
         public:
+            /// @brief XSDP Table Address
             typedef u8* RSDPAddress;
+
+            /// @brief ACPI Versions and their Revision Code
+            enum Version {
+                INVALID = 0,
+                ONE = 1,
+                TWO = 2
+            };
+
             struct XsdpTable {
                 char Signature[8];
                 u8 Checksum;
@@ -48,6 +57,7 @@ namespace Drivers {
             };
 
             static RSDPAddress GetRSDPAddr();
+            static Version GetACPIVersion(XsdpTable* XsdpTbl);
         };
     }
 }
