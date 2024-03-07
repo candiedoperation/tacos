@@ -38,6 +38,7 @@ extern "C" void LoadKernel()
     clear_screen();
 
     VgaTextMode::BufferWrite("Hello World! This Function works Properly!\n", vga_color::WHITE, vga_color::GREEN);
+    VgaTextMode::BufferWrite("Hellow!");
 
     AcpiTable::GetRSDPAddr();
     Interrupt::Register();

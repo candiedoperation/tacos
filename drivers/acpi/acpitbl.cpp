@@ -53,16 +53,16 @@ AcpiTable::RSDPAddress GetRSDPAddrBIOS()
        https://github.com/torvalds/linux/blob/master/arch/x86/boot/compressed/acpi.c
    */
 
+    /* Probe Memory Regions 0x000E0000 to 0x000FFFFF */
     bool FoundSignature = false;
     for (int MemLoc = ACPI_BIOS_MEM_STA; MemLoc <= ACPI_BIOS_MEM_END; MemLoc += 16) {
         const u8* MemBlock = (u8*) MemLoc;
         const AcpiTable::XsdpTable* XsdpTable = (AcpiTable::XsdpTable*)MemBlock;
         FoundSignature = ValidateXsdpSignature(XsdpTable->Signature);
-        if (FoundSignature == true) break;
+        if (FoundSignature == true) return (AcpiTable::RSDPAddress) MemLoc;
     }
 
-    const char* str = (FoundSignature) ? "SIG FOUND" : "SIG NOT FOUND";
-    VgaTextMode::BufferWrite((char*)str);
+    /* Get Pointer to EBDA and Probe first 1KB */
 
     return 0;
 }
@@ -78,6 +78,8 @@ AcpiTable::RSDPAddress GetRSDPAddrUEFI()
 /// @return Pointer to RSD or 0 (if not found)
 AcpiTable::RSDPAddress AcpiTable::GetRSDPAddr()
 {
-    GetRSDPAddrBIOS();
+    AcpiTable::RSDPAddress RsdpAddr = GetRSDPAddrBIOS();
+    VgaTextMode::BufferWrite((char *) ((RsdpAddr != 0) ? "RSDP Found" : "RSDP Not Found"));
+
     return 0;
 }

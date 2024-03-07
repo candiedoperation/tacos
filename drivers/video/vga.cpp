@@ -39,8 +39,8 @@ void VgaTextMode::BufferWrite(char* buffer, vga_color FgColor, vga_color BgColor
     for (int i = 0; buffer[i] != '\0'; i++) {
         if (buffer[i] == '\n') {
             /* Set Cursor Positions for Next Line */
-            int currentLine = ((int)(CursorPos / ScreenWidth)) + 1;
-            CursorPos = (currentLine * (ScreenWidth));
+            int currentLine = ((int)((CursorPos / 2) / ScreenWidth)) + 1;
+            CursorPos = (currentLine * (ScreenWidth * 2));
 
             /* Don't Print \n */
             continue;
