@@ -27,6 +27,8 @@ using namespace tacos::Kernel;
 #define ACPI_EBDA_SEG 0x40E
 #define ACPI_BIOS_MEM_STA 0x000E0000
 #define ACPI_BIOS_MEM_END 0x000FFFFF
+#define ACPI_RSDP_STLEN 20 /* Length of the RSDP Struct */
+#define ACPI_XSDP_STLEN 36 /* Length of the XSDP Struct */
 
 namespace tacos {
 namespace Drivers {
@@ -57,7 +59,7 @@ namespace Drivers {
             };
 
             static RSDPAddress GetRSDPAddr();
-            static Version GetACPIVersion(XsdpTable* XsdpTbl);
+            static Version GetACPIVersion(const XsdpTable* XsdpTbl);
         };
     }
 }

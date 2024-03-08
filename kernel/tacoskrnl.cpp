@@ -34,7 +34,7 @@ void clear_screen()
 
 void init_acpi()
 {
-    AcpiDef::RSDPAddress RsdpAddr = AcpiDef::GetRSDPAddr();
+    const AcpiDef::RSDPAddress RsdpAddr = AcpiDef::GetRSDPAddr();
     if (RsdpAddr != 0) {
         AcpiDef::XsdpTable* XsdpTable = (AcpiDef::XsdpTable*)RsdpAddr;
         switch (AcpiDef::GetACPIVersion(XsdpTable)) {

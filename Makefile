@@ -50,6 +50,9 @@ $(BUILD_PATH)/tacos.iso: $(BUILD_PATH)/kernel.bin
 run: $(BUILD_PATH)/tacos.iso
 	qemu-system-x86_64 -cdrom $(BUILD_PATH)/tacos.iso
 
+run-uefi: $(BUILD_PATH)/tacos.iso
+	qemu-system-x86_64 -bios /usr/share/ovmf/OVMF.fd -cdrom $(BUILD_PATH)/tacos.iso
+
 run-debug: $(BUILD_PATH)/tacos.iso
 	qemu-system-x86_64  -s -S -cdrom $(BUILD_PATH)/tacos.iso
 	echo "-d int -no-reboot -no-shutdown"

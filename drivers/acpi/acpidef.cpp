@@ -22,6 +22,9 @@
 using namespace tacos::Drivers::Acpi;
 using namespace tacos::Drivers::Video;
 
+/// @brief Checks if current string is RSD PTR
+/// @param Signature Pointer to 8 byte Signature String
+/// @return True or False based on Validity
 bool ValidateXsdpSignature(const char* Signature)
 {
     bool SigValid = true;
@@ -33,6 +36,48 @@ bool ValidateXsdpSignature(const char* Signature)
     }
 
     return SigValid;
+}
+
+/// @brief Validates the RSDP or XSDP Checksum
+/// @param XsdpTable Pointer to the XSDP Table
+/// @return True or False based on Validity
+bool ValidateXsdpChecksum(const AcpiDef::XsdpTable* XsdpTable)
+{
+    /*
+        Before the RSDP is relied upon you should check that the checksum
+        is valid. For ACPI 1.0 (the first structure) you add up every byte
+        in the structure and make sure the lowest byte of the result is equal
+        to zero. For ACPI 2.0 and later you'd do exactly the same thing for
+        the original (ACPI 1.0) part of the second structure, and then do it
+        again for the fields that are part of the ACPI 2.0 extension.
+
+        Refer:
+        https://wiki.osdev.org/RSDP#Checksum_validation
+    */
+
+    bool XsdpChecksumValid = false;
+
+    u32 RsdpByteSum = 0;
+    u8* XsdpPtr = (u8*)XsdpTable;
+
+    /* Add all bytes in structure */
+    for (u8 Offset = 0; Offset <= ACPI_RSDP_STLEN; Offset++) {
+        RsdpByteSum += XsdpPtr[Offset];
+    }
+
+    /* Lowest Byte of RsdpByteSum is Zero for Valid Structures */
+    XsdpChecksumValid = ((RsdpByteSum & 0xFF) == 0);
+
+    if (AcpiDef::GetACPIVersion(XsdpTable) >= AcpiDef::Version::TWO) {
+        u32 XsdpByteSum = 0;
+        for (u8 Offset = 0; Offset <= ACPI_XSDP_STLEN; Offset++) {
+            XsdpByteSum += XsdpPtr[Offset];
+        }
+
+        XsdpChecksumValid = ((XsdpByteSum & 0xFF) == 0);
+    }
+
+    return XsdpChecksumValid;
 }
 
 /// @brief Tries to Find the RSDP Address using the BIOS Search Method
@@ -58,8 +103,7 @@ AcpiDef::RSDPAddress GetRSDPAddrBIOS()
     for (int MemLoc = ACPI_BIOS_MEM_STA; MemLoc <= ACPI_BIOS_MEM_END; MemLoc += 16) {
         const u8* MemBlock = (u8*)MemLoc;
         const AcpiDef::XsdpTable* XsdpTable = (AcpiDef::XsdpTable*)MemBlock;
-        FoundSignature = ValidateXsdpSignature(XsdpTable->Signature);
-        if (FoundSignature == true)
+        if (ValidateXsdpSignature(XsdpTable->Signature) && ValidateXsdpChecksum(XsdpTable))
             return (AcpiDef::RSDPAddress)MemLoc;
     }
 
@@ -86,7 +130,7 @@ AcpiDef::RSDPAddress AcpiDef::GetRSDPAddr()
 /// @brief Parses the ACPI Version from RSDP or XSDP
 /// @param XsdpTbl Pointer to RSDP or XSDP
 /// @return ACPI Version Enumerated Type
-AcpiDef::Version AcpiDef::GetACPIVersion(AcpiDef::XsdpTable* XsdpTbl)
+AcpiDef::Version AcpiDef::GetACPIVersion(const AcpiDef::XsdpTable* XsdpTbl)
 {
     /*
         The ACPI Version can be detected using the Revision field in the RSDP.
