@@ -36,8 +36,8 @@ void init_acpi()
 {
     const AcpiDef::RSDPAddress RsdpAddr = AcpiDef::GetRSDPAddr();
     if (RsdpAddr != 0) {
-        AcpiDef::XsdpTable* XsdpTable = (AcpiDef::XsdpTable*)RsdpAddr;
-        switch (AcpiDef::GetACPIVersion(XsdpTable)) {
+        AcpiDef::Rsdp* Rsdp = (AcpiDef::Rsdp*)RsdpAddr;
+        switch (AcpiDef::GetACPIVersion(Rsdp)) {
         case AcpiDef::ONE: {
             VgaTextMode::BufferWrite("ACPI Version 1.0\n");
             break;

@@ -45,7 +45,21 @@ namespace Drivers {
                 TWO = 2
             };
 
-            struct XsdpTable {
+            /// @brief Common Header for all ACPI System Descriptor Tables
+            struct SdtHeader {
+                char Signature[4];
+                u32 Length;
+                u8 Revision;
+                u8 Checksum;
+                char OEMID[6];
+                char OEMTableID[8];
+                u32 OEMRevision;
+                u32 CreatorID;
+                u32 CreatorRevision;
+            };
+
+            /// @brief The Root System Descriptor Pointer Structure
+            struct Rsdp {
                 char Signature[8];
                 u8 Checksum;
                 char OEMID[6];
@@ -58,8 +72,36 @@ namespace Drivers {
                 u8 Reserved[3];
             };
 
+            /// @brief Extended System Descriptor Table Structure
+            struct Xsdt {
+                /*
+                    The XSDT is the main System Description Table. However there are 
+                    many kinds of SDT. All the SDT may be split into two parts. One 
+                    (the header) which is common to all the SDT an another (data) which 
+                    is different for each table.
+
+                    The SdtList consists of pointers to all available SDTs. The size is
+                    set to one as it's a hack (struct hack) that lets initialize the 
+                    array and access elements at any offset. In case of invalid access, 
+                    it leads to undefined behavior.
+
+                    Refer:
+                    https://wiki.osdev.org/XSDT#Structure
+                */
+
+                struct SdtHeader Header;
+                u64 SdtList[1];
+            };
+
+            /// @brief Root System Description Table Structure
+            struct Rsdt {
+                /* Refer: https://wiki.osdev.org/RSDT */
+                struct SdtHeader Header;
+                u32 SdtList[1];
+            };
+
             static RSDPAddress GetRSDPAddr();
-            static Version GetACPIVersion(const XsdpTable* XsdpTbl);
+            static Version GetACPIVersion(const Rsdp* XsdpTbl);
         };
     }
 }

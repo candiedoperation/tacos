@@ -39,9 +39,9 @@ bool ValidateXsdpSignature(const char* Signature)
 }
 
 /// @brief Validates the RSDP or XSDP Checksum
-/// @param XsdpTable Pointer to the XSDP Table
+/// @param Rsdp Pointer to the XSDP Table
 /// @return True or False based on Validity
-bool ValidateXsdpChecksum(const AcpiDef::XsdpTable* XsdpTable)
+bool ValidateXsdpChecksum(const AcpiDef::Rsdp* Rsdp)
 {
     /*
         Before the RSDP is relied upon you should check that the checksum
@@ -58,7 +58,7 @@ bool ValidateXsdpChecksum(const AcpiDef::XsdpTable* XsdpTable)
     bool XsdpChecksumValid = false;
 
     u32 RsdpByteSum = 0;
-    u8* XsdpPtr = (u8*)XsdpTable;
+    u8* XsdpPtr = (u8*)Rsdp;
 
     /* Add all bytes in structure */
     for (u8 Offset = 0; Offset <= ACPI_RSDP_STLEN; Offset++) {
@@ -68,7 +68,8 @@ bool ValidateXsdpChecksum(const AcpiDef::XsdpTable* XsdpTable)
     /* Lowest Byte of RsdpByteSum is Zero for Valid Structures */
     XsdpChecksumValid = ((RsdpByteSum & 0xFF) == 0);
 
-    if (AcpiDef::GetACPIVersion(XsdpTable) >= AcpiDef::Version::TWO) {
+    if (AcpiDef::GetACPIVersion(Rsdp) >= AcpiDef::Version::TWO) {
+        /* FUTURE: merge this into a single fn like linux does */
         u32 XsdpByteSum = 0;
         for (u8 Offset = 0; Offset <= ACPI_XSDP_STLEN; Offset++) {
             XsdpByteSum += XsdpPtr[Offset];
@@ -102,8 +103,8 @@ AcpiDef::RSDPAddress GetRSDPAddrBIOS()
     bool FoundSignature = false;
     for (int MemLoc = ACPI_BIOS_MEM_STA; MemLoc <= ACPI_BIOS_MEM_END; MemLoc += 16) {
         const u8* MemBlock = (u8*)MemLoc;
-        const AcpiDef::XsdpTable* XsdpTable = (AcpiDef::XsdpTable*)MemBlock;
-        if (ValidateXsdpSignature(XsdpTable->Signature) && ValidateXsdpChecksum(XsdpTable))
+        const AcpiDef::Rsdp* Rsdp = (AcpiDef::Rsdp*)MemBlock;
+        if (ValidateXsdpSignature(Rsdp->Signature) && ValidateXsdpChecksum(Rsdp))
             return (AcpiDef::RSDPAddress)MemLoc;
     }
 
@@ -128,9 +129,9 @@ AcpiDef::RSDPAddress AcpiDef::GetRSDPAddr()
 }
 
 /// @brief Parses the ACPI Version from RSDP or XSDP
-/// @param XsdpTbl Pointer to RSDP or XSDP
+/// @param Rsdp Pointer to RSDP or XSDP
 /// @return ACPI Version Enumerated Type
-AcpiDef::Version AcpiDef::GetACPIVersion(const AcpiDef::XsdpTable* XsdpTbl)
+AcpiDef::Version AcpiDef::GetACPIVersion(const AcpiDef::Rsdp* Rsdp)
 {
     /*
         The ACPI Version can be detected using the Revision field in the RSDP.
@@ -142,7 +143,7 @@ AcpiDef::Version AcpiDef::GetACPIVersion(const AcpiDef::XsdpTable* XsdpTbl)
         https://wiki.osdev.org/RSDP#Detecting_ACPI_Version
     */
 
-    u8 AcpiRevision = XsdpTbl->Revision;
+    u8 AcpiRevision = Rsdp->Revision;
     if (AcpiRevision == 0)
         return AcpiDef::Version::ONE;
     else if (AcpiRevision == 2) {
