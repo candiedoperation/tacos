@@ -23,12 +23,15 @@
 
 using namespace tacos::Kernel;
 
-#define ACPI_RSDP_STR "RSD PTR "
 #define ACPI_EBDA_SEG 0x40E
 #define ACPI_BIOS_MEM_STA 0x000E0000
 #define ACPI_BIOS_MEM_END 0x000FFFFF
 #define ACPI_RSDP_STLEN 20 /* Length of the RSDP Struct */
 #define ACPI_XSDP_STLEN 36 /* Length of the XSDP Struct */
+
+#define ACPI_SIG_RSDP "RSD PTR "
+#define ACPI_SIG_FADT "FACP"
+#define ACPI_SIG_MADT "APIC"
 
 namespace tacos {
 namespace Drivers {
@@ -37,6 +40,8 @@ namespace Drivers {
         public:
             /// @brief XSDP Table Address
             typedef u8* RSDPAddress;
+            typedef u32 Status;
+            typedef u64 Address;
 
             /// @brief ACPI Versions and their Revision Code
             enum Version {
@@ -56,7 +61,7 @@ namespace Drivers {
                 u32 OEMRevision;
                 u32 CreatorID;
                 u32 CreatorRevision;
-            };
+            } __attribute__((packed));
 
             /// @brief The Root System Descriptor Pointer Structure
             struct Rsdp {
@@ -70,7 +75,7 @@ namespace Drivers {
                 u64 XsdtAddress;
                 u8 ExtendedChecksum;
                 u8 Reserved[3];
-            };
+            } __attribute__((packed));
 
             /// @brief Extended System Descriptor Table Structure
             struct Xsdt {
@@ -90,8 +95,8 @@ namespace Drivers {
                 */
 
                 struct SdtHeader Header;
-                u64 SdtList[1];
-            };
+                u64 SdtList[1] __attribute__((aligned(4)));
+            }  __attribute__((packed));
 
             /// @brief Root System Description Table Structure
             struct Rsdt {
@@ -102,6 +107,7 @@ namespace Drivers {
 
             static RSDPAddress GetRSDPAddr();
             static Version GetACPIVersion(const Rsdp* XsdpTbl);
+            static Status GetTableBySignature(char* Signature, Xsdt* Xsdt, Address* Table);
         };
     }
 }

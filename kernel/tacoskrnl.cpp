@@ -45,6 +45,8 @@ void init_acpi()
 
         case AcpiDef::TWO: {
             VgaTextMode::BufferWrite("ACPI Version 2.0\n");
+            AcpiDef::Xsdt* Xsdt = (AcpiDef::Xsdt*) Rsdp->XsdtAddress;
+            AcpiDef::GetTableBySignature(0, Xsdt, 0);
             break;
         }
 
@@ -55,7 +57,7 @@ void init_acpi()
         }
     } else {
         VgaTextMode::BufferWrite("ACPI Not Supported");
-        asm volatile ("cli; hlt");
+        asm volatile("cli; hlt");
     }
 }
 

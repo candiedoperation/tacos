@@ -29,7 +29,7 @@ bool ValidateXsdpSignature(const char* Signature)
 {
     bool SigValid = true;
     for (int i = 0; i < sizeof(Signature); i++) {
-        if (Signature[i] != ACPI_RSDP_STR[i]) {
+        if (Signature[i] != ACPI_SIG_RSDP[i]) {
             SigValid = false;
             break;
         }
@@ -105,7 +105,7 @@ AcpiDef::RSDPAddress GetRSDPAddrBIOS()
         const u8* MemBlock = (u8*)MemLoc;
         const AcpiDef::Rsdp* Rsdp = (AcpiDef::Rsdp*)MemBlock;
         if (ValidateXsdpSignature(Rsdp->Signature) && ValidateXsdpChecksum(Rsdp))
-            return (AcpiDef::RSDPAddress)MemLoc;
+            return (AcpiDef::RSDPAddress) MemLoc;
     }
 
     /* Get Pointer to EBDA and Probe first 1KB */
@@ -152,4 +152,36 @@ AcpiDef::Version AcpiDef::GetACPIVersion(const AcpiDef::Rsdp* Rsdp)
     }
 
     return AcpiDef::Version::INVALID;
+}
+
+/// @brief Fetch ACPI Table using its Signature
+/// @param Signature ACPI Table Signature
+/// @param Xsdt Pointer to Root SDT (XSDT)
+/// @param Table [out] Pointer to Output Table Address
+/// @return ACPI Status
+AcpiDef::Status AcpiDef::GetTableBySignature(
+    char* Signature,
+    AcpiDef::Xsdt* Xsdt,
+    AcpiDef::Address* Table)
+{
+    /*
+        The XSDT Length parameter indicates the total size of the table, 
+        inclusive of the header.
+
+        Find the number of SdtList entries in the Root SDT by subtracting
+        the total length field of the Root SDT from its header size. The 
+        resulting value is the number of bytes. XSDT values are 8 bytes
+        in length. Divide the resulting value by 8 to get the entries.
+    */
+
+    u32 SdtEntries = ((Xsdt->Header.Length - sizeof(Xsdt->Header)) / 8);
+    for (u32 Offset = 0; Offset < SdtEntries; Offset++) {
+        AcpiDef::SdtHeader* TableHeader = (AcpiDef::SdtHeader*) Xsdt->SdtList[Offset];
+
+        char* a = TableHeader->Signature;
+        VgaTextMode::BufferWrite(a);
+        VgaTextMode::BufferWrite("\n");
+    }
+
+    return 0;
 }
