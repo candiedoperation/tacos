@@ -65,6 +65,16 @@ namespace Drivers {
 
             /// @brief The Root System Descriptor Pointer Structure
             struct Rsdp {
+                /*
+                    The Root System Description Pointer (RSDP) structure is located in the
+                    system’s memory address space and is setup by the platform firmware. The
+                    RSDP consists of a pointer to the Extended System Description Table, XSDT,
+                    which contains an array of pointers to all other System Description Tables.
+
+                    Refer:
+                    https://uefi.org/htmlspecs/ACPI_Spec_6_4_html/05_ACPI_Software_Programming_Model/ACPI_Software_Programming_Model.html
+                */
+
                 char Signature[8];
                 u8 Checksum;
                 char OEMID[6];
@@ -80,15 +90,20 @@ namespace Drivers {
             /// @brief Extended System Descriptor Table Structure
             struct Xsdt {
                 /*
-                    The XSDT is the main System Description Table. However there are 
-                    many kinds of SDT. All the SDT may be split into two parts. One 
-                    (the header) which is common to all the SDT an another (data) which 
+                    The XSDT is the main System Description Table. However there are
+                    many kinds of SDT. All the SDT may be split into two parts. One
+                    (the header) which is common to all the SDT an another (data) which
                     is different for each table.
 
                     The SdtList consists of pointers to all available SDTs. The size is
-                    set to one as it's a hack (struct hack) that lets initialize the 
-                    array and access elements at any offset. In case of invalid access, 
+                    set to one as it's a hack (struct hack) that lets initialize the
+                    array and access elements at any offset. In case of invalid access,
                     it leads to undefined behavior.
+
+                    The SdtList field should be defined such that it is aligned to a 
+                    4-byte boundary and not the default 8-byte alignment for a uint64_t. 
+                    Also, The offset to the first pointer from the beginning of the XSDT
+                    table is 36 bytes. 
 
                     Refer:
                     https://wiki.osdev.org/XSDT#Structure
@@ -96,7 +111,7 @@ namespace Drivers {
 
                 struct SdtHeader Header;
                 u64 SdtList[1] __attribute__((aligned(4)));
-            }  __attribute__((packed));
+            } __attribute__((packed));
 
             /// @brief Root System Description Table Structure
             struct Rsdt {

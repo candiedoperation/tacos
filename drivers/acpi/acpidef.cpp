@@ -183,5 +183,6 @@ AcpiDef::Status AcpiDef::GetTableBySignature(
         VgaTextMode::BufferWrite("\n");
     }
 
+    // Think of returning an address to the table!
     return 0;
 }
