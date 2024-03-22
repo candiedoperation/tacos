@@ -25,6 +25,7 @@
 ;
 ; Refer:
 ; https://wiki.osdev.org/Interrupts_tutorial#ISRs
+; https://github.com/cstack/osdev/blob/master/asm_interrupts.s
 
 %macro isr_wrapper 1
 isr_wrapper_%+%1:
@@ -39,7 +40,7 @@ isr_wrapper_%+%1:
 ; define total interrupt count for using them in %rep.
 
 extern InterruptHandler
-%assign isr_count 32
+%assign isr_count 50
 
 %assign ihctr 0
 %rep isr_count

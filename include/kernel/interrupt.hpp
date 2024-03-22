@@ -23,18 +23,7 @@
 
 using namespace tacos::Kernel;
 
-#define DEFINE_INTERRUPT(x) \
-    extern "C" void HandleInterrupt##x() { HandleInterrupt(x); }
-
-#define CREATE_INTERRUPT(x)                                         \
-    idt = &IdTable[x];                                              \
-    idt->IsrLow = ((u64) & HandleInterrupt##x) & 0xFFFF;            \
-    idt->KernelCs = 0x08;                                           \
-    idt->Ist = 0;                                                   \
-    idt->Attributes = 0x8e;                                         \
-    idt->IsrMid = ((u64) & HandleInterrupt##x >> 16) & 0xFFFF;      \
-    idt->IsrHigh = ((u64) & HandleInterrupt##x >> 32) & 0xFFFFFFFF; \
-    idt->Reserved = 0;
+#define INTERRUPT_ISRCOUNT 50
 
 namespace tacos {
 namespace Kernel {

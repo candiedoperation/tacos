@@ -31,6 +31,7 @@ namespace Kernel {
     extern "C" void* IsrWrapperTable[];
     extern "C" void InterruptHandler() {
         VgaTextMode::BufferWrite("uhoh");
+        Pic8259::EndOfInterrupt(32);
         //__asm__ volatile ("cli; hlt");
     }
 
@@ -45,7 +46,7 @@ namespace Kernel {
         Idtr.limit = sizeof(IdTable);
 
         /* Populate the Interrupt Descriptor Table */
-        for (u8 Offset = 0; Offset < 32; Offset++) {
+        for (u8 Offset = 0; Offset < INTERRUPT_ISRCOUNT; Offset++) {
             IdTableEntry* Idt = &IdTable[Offset];
             Idt->IsrLow = ((u64) IsrWrapperTable[Offset]) & 0xFFFF;
             Idt->KernelCs = 0x08; /* What's GDT_OFFSET_KERNEL_CODE? */
@@ -67,12 +68,11 @@ namespace Kernel {
             https://wiki.osdev.org/Inline_Assembly/Examples
         */
 
-        __asm__ volatile("lidt %0" : : "m"(Idtr));
-        //__asm__ volatile("sti");
+        /* Initialize Interrupt Controllers */
+        Pic8259::Initialize();
 
-        /* Initialize PIC and Set Interrupt Flag */
-        //Pic8259::Initialize();
-        //__asm__ volatile("sti");
+        __asm__ volatile("lidt %0" : : "m"(Idtr));
+        __asm__ volatile("sti");
     }
 
     void Interrupt::UnhandledException(int Code)
