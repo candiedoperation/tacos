@@ -50,6 +50,19 @@ namespace Drivers {
                 TWO = 2
             };
 
+            /// @brief ACPI Power Management Profiles
+            enum PowerManagementProfile {
+                UNSPECIFIED = 0,
+                DESKTOP = 1,
+                MOBILE = 2,
+                WORKSTATION = 3,
+                ENTERPRISE_SERVER = 4,
+                SOHO_SERVER = 5,
+                APPLIANCE_PC = 6,
+                PERFORMANCE_SERVER = 7,
+                TABLET = 8
+            };
+
             /// @brief Common Header for all ACPI System Descriptor Tables
             struct SdtHeader {
                 char Signature[4];
@@ -62,6 +75,24 @@ namespace Drivers {
                 u32 CreatorID;
                 u32 CreatorRevision;
             } __attribute__((packed));
+
+            /// @brief Generic Address Strucutre (GAS) Format
+            struct GenericAddressStructure {
+                /*
+                    ACPI Uses the Generic Address Structure format
+                    to describe the position of registers. The str
+                    -ucture is 12 bytes in length.
+
+                    Refer:
+                    https://wiki.osdev.org/FADT#GenericAddressStructure
+                */
+
+                u8 AddressSpace;
+                u8 BitWidth;
+                u8 BitOffset;
+                u8 AccessSize;
+                u64 Address;
+            };
 
             /// @brief The Root System Descriptor Pointer Structure
             struct Rsdp {
@@ -87,6 +118,13 @@ namespace Drivers {
                 u8 Reserved[3];
             } __attribute__((packed));
 
+            /// @brief Root System Description Table Structure
+            struct Rsdt {
+                /* Refer: https://wiki.osdev.org/RSDT */
+                SdtHeader Header;
+                u32 SdtList[1];
+            };
+
             /// @brief Extended System Descriptor Table Structure
             struct Xsdt {
                 /*
@@ -100,24 +138,109 @@ namespace Drivers {
                     array and access elements at any offset. In case of invalid access,
                     it leads to undefined behavior.
 
-                    The SdtList field should be defined such that it is aligned to a 
-                    4-byte boundary and not the default 8-byte alignment for a uint64_t. 
+                    The SdtList field should be defined such that it is aligned to a
+                    4-byte boundary and not the default 8-byte alignment for a uint64_t.
                     Also, The offset to the first pointer from the beginning of the XSDT
-                    table is 36 bytes. 
+                    table is 36 bytes.
 
                     Refer:
                     https://wiki.osdev.org/XSDT#Structure
                 */
 
-                struct SdtHeader Header;
+                SdtHeader Header;
                 u64 SdtList[1] __attribute__((aligned(4)));
             } __attribute__((packed));
 
-            /// @brief Root System Description Table Structure
-            struct Rsdt {
-                /* Refer: https://wiki.osdev.org/RSDT */
-                struct SdtHeader Header;
-                u32 SdtList[1];
+            /// @brief Fixed ACPI Description Table Structure
+            struct Fadt {
+                /*
+                    The Fixed ACPI Description Table (FADT) defines various fixed
+                    hardware ACPI information vital to an ACPI-compatible OS. The
+                    FADT also has a pointer to the DSDT that contains the Differen
+                    -tiated Definition Block.
+
+                    Refer:
+                    https://uefi.org/htmlspecs/ACPI_Spec_6_4_html/05_ACPI_Software_Programming_Model/ACPI_Software_Programming_Model.html#fixed-acpi-description-table-fadt
+                    https://wiki.osdev.org/FADT
+                */
+
+                SdtHeader Header;
+                u32 FirmwareCtrl;
+                u32 Dsdt; /* Physical Memory Address of DSDT */
+                u8 Reserved0;
+
+                u8 PreferredPowerMgmtProfile; /* Map to PwrMgmt Enum */
+                u16 SciInterrupt;
+                u32 SmiCommandPort;
+                u8 AcpiEnable;
+                u8 AcpiDisable;
+                u8 S4BiosReq;
+                u8 PerformanceStateControl;
+
+                /* Power Management (PM) Register Blocks */
+                u32 Pm1aEventBlock;
+                u32 Pm1bEventBlock;
+                u32 Pm1aControlBlock;
+                u32 Pm1bControlBlock;
+                u32 Pm2ControlBlock;
+                u32 PmTimerBlock;
+
+                /* General Purpose Event (GPE) Register Blocks */
+                u32 Gpe0Block;
+                u32 Gpe1Block;
+
+                u8 Pm1EventLength; /* Bytes decoded by Pm1EventBlock. Always >= 4 */
+                u8 Pm1ControlLength; /* Bytes decoded by Pm1ControlBlock. Always >= 2 */
+                u8 Pm2ControlLength; /* Bytes decoded, If Pm2Control supported, >= 1 */
+                u8 PmTimerLength; /* If Timer supported, value is 4 otherwise zero */
+                u8 Gpe0BlockLength; /* Bytes Decoded by Gpe0Block. Multiple of 2 */
+                u8 Gpe1BlockLength; /* Bytes Decoded by Gpe1Block. Multiple of 2 */
+                u8 Gpe1Base;
+
+                /* CPU Power Profile (C State) Fields */
+                u8 CStateControl;
+                u16 CState2SwitchLatency; /* Worst Latency is toggling C2 State */
+                u16 CState3SwitchLatency; /* Worst Latency is toggling C3 State */
+
+                u16 FlushSize;
+                u16 FlushStride;
+                u8 DutyOffset;
+                u8 DutyWidth;
+                u8 DayOfMonthAlarm;
+                u8 MonthOfYearAlarm;
+                u8 Century; /* RTC Century Feature */
+
+                u16 IAPCBootArchFlags; /* IA-PC Boot Architecture Flags */
+                u8 Reserved1;
+                u32 Flags;
+
+                /* ACPI System Reset Fields */
+                GenericAddressStructure ResetRegister;
+                u8 ResetRegisterValue;
+
+                u16 ArmBootArchFlags; /* ARM Boot Architecture Flags */
+                u8 FadtMinorVersion;
+
+                /* Extended 64bit Pointers */
+                u64 ExFirmwareControl;
+                u64 ExDsdt;
+
+                /* Extended Power Manamgement (PM) Register Blocks */
+                GenericAddressStructure ExPm1aEventBlock;
+                GenericAddressStructure ExPm1bEventBlock;
+                GenericAddressStructure ExPm1aControlBlock;
+                GenericAddressStructure ExPm1bControlBlock;
+                GenericAddressStructure ExPm2ControlBlock;
+                GenericAddressStructure ExPmTimerBlock;
+
+                /* Extended General Purpose Event (GPE) Register Blocks */
+                GenericAddressStructure ExGpe0Block;
+                GenericAddressStructure ExGpe1Block;
+
+                /* Other Extended Registers */
+                GenericAddressStructure SleepControlRegister;
+                GenericAddressStructure SleepStatusRegister;
+                u64 HypervisorVendorId;
             };
 
             static RSDPAddress GetRSDPAddr();
