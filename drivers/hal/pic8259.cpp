@@ -70,6 +70,7 @@ void Pic8259::Initialize()
     /* Set Offset. Protected and Long modes reserve interrupts 0-31 for CPU */
     const u8 MASTER_OFFSET = 32;
     const u8 SLAVE_OFFSET = (MASTER_OFFSET + 8);
+
     IO::outb(PIC8259_MASTER_DATA, MASTER_OFFSET);
     IO::wait();
     IO::outb(PIC8259_SLAVE_DATA, SLAVE_OFFSET);
@@ -87,6 +88,7 @@ void Pic8259::Initialize()
 
     const u8 MASTER_ICW3 = 0b00000100; /* Slave at 2rd IRQ */
     const u8 SLAVE_ICW3 = 0b00000010; /* Slave ID is 2 */
+    
     IO::outb(PIC8259_MASTER_DATA, MASTER_ICW3);
     IO::wait();
     IO::outb(PIC8259_SLAVE_DATA, SLAVE_ICW3);
@@ -115,8 +117,8 @@ void Pic8259::EndOfInterrupt(u8 Code)
         If the IRQ is from the slave, send it to both Master and Slave.
     */
 
-    //if (Code >= 40)
-    //    IO::outb(PIC8259_SLAVE, PIC8259_EOI);
+    if (Code >= 40)
+        IO::outb(PIC8259_SLAVE, PIC8259_EOI);
 
     IO::outb(PIC8259_MASTER, PIC8259_EOI);
 }
