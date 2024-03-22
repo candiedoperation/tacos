@@ -23,7 +23,7 @@
 
 using namespace tacos::Kernel;
 
-#define INTERRUPT_ISRCOUNT 50
+#define INTERRUPT_ISRCOUNT 50 /* Should match with isrdef.asm */
 
 namespace tacos {
 namespace Kernel {

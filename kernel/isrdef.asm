@@ -39,8 +39,8 @@ isr_wrapper_%+%1:
 ; a common interrupt wrapper for N interrupts. Additionally,
 ; define total interrupt count for using them in %rep.
 
-extern InterruptHandler
-%assign isr_count 50
+extern InterruptHandler ; Matches with interrupt.hpp
+%assign isr_count 50    ; Should Match with interrupt.hpp
 
 %assign ihctr 0
 %rep isr_count
