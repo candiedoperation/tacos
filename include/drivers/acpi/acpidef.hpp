@@ -241,7 +241,7 @@ namespace Drivers {
                 GenericAddressStructure SleepControlRegister;
                 GenericAddressStructure SleepStatusRegister;
                 u64 HypervisorVendorId;
-            };
+            } __attribute__((packed));
 
             static RSDPAddress GetRSDPAddr();
             static Version GetACPIVersion(const Rsdp* XsdpTbl);
