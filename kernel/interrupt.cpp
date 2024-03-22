@@ -34,11 +34,13 @@ namespace Kernel {
 
     void Interrupt::Register()
     {
+        /* Define a Global Interrupt Descriptor Table */
+        __attribute__((aligned(0x10))) static IdTableEntry IdTable[256];
+        static IdTableRegister Idtr;
+
         /* IDT Init */
         Idtr.base = (u64)&IdTable[0];
         Idtr.limit = sizeof(IdTable);
-
-        IdTableEntry* idt;
 
         /*
             __asm__ executes traditional assembly block. Does not use GNU Ex
@@ -49,13 +51,11 @@ namespace Kernel {
             optimizations do not remove the assembly instructions.
         */
 
-        __asm__ volatile("lidt %0" : : "m"(Idtr));
+        //__asm__ volatile("lidt %0" : : "m"(Idtr));
 
         /* Initialize PIC and Set Interrupt Flag */
         Pic8259::Initialize();
-        __asm__ volatile("sti");
-
-        VgaTextMode::BufferWrite("Registered for Exceptions!\n", vga_color::WHITE, vga_color::GREEN);
+        //__asm__ volatile("sti");
     }
 
     void Interrupt::UnhandledException(int Code)

@@ -58,10 +58,6 @@ namespace Kernel {
             u64 base;
         } __attribute__((packed));
 
-        /* Define a Global Interrupt Descriptor Table */
-        __attribute__((aligned(0x10))) static IdTableEntry IdTable[256];
-        static IdTableRegister Idtr;
-
         static void Register();
         static void UnhandledException(int Code);
     };
