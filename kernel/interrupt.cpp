@@ -57,6 +57,9 @@ namespace Kernel {
             Idt->Reserved = 0;
         }
 
+        /* Initialize Interrupt Controllers */
+        Pic8259::Initialize();
+
         /*
             __asm__ executes traditional assembly block and it does 
             not use GNU Extensions or extended assembly. (GCC asm() 
@@ -67,9 +70,6 @@ namespace Kernel {
             Refer:
             https://wiki.osdev.org/Inline_Assembly/Examples
         */
-
-        /* Initialize Interrupt Controllers */
-        Pic8259::Initialize();
 
         __asm__ volatile("lidt %0" : : "m"(Idtr));
         __asm__ volatile("sti");
