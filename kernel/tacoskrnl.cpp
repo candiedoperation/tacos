@@ -72,8 +72,8 @@ extern "C" void LoadKernel()
     Interrupt::Register();
 
     /* Check if Interrupts Work! */
-    // int DivByZ = 1 / 0;
-    //  int DivByZ2 = 1/0;
+    //int DivByZ = 1 / 0;
+    //int DivByZ2 = 1/0;
 
     for (;;) {
         /*

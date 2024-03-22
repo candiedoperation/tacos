@@ -28,8 +28,10 @@ using namespace tacos::ASM;
 
 namespace tacos {
 namespace Kernel {
-    void InterruptHandler() {
-        __asm__ volatile ("cli; hlt");
+    extern "C" void* IsrWrapperTable[];
+    extern "C" void InterruptHandler() {
+        VgaTextMode::BufferWrite("uhoh");
+        //__asm__ volatile ("cli; hlt");
     }
 
     void Interrupt::Register()
@@ -42,19 +44,34 @@ namespace Kernel {
         Idtr.base = (u64)&IdTable[0];
         Idtr.limit = sizeof(IdTable);
 
-        /*
-            __asm__ executes traditional assembly block. Does not use GNU Ex
-            -tensions or extended assembly. (GCC asm() and asm(:))
-            https://wiki.osdev.org/Inline_Assembly/Examples
+        /* Populate the Interrupt Descriptor Table */
+        for (u8 Offset = 0; Offset < 32; Offset++) {
+            IdTableEntry* Idt = &IdTable[Offset];
+            Idt->IsrLow = ((u64) IsrWrapperTable[Offset]) & 0xFFFF;
+            Idt->KernelCs = 0x08; /* What's GDT_OFFSET_KERNEL_CODE? */
+            Idt->Ist = 0;
+            Idt->Attributes = 0x8E; /* What's this Flag? */
+            Idt->IsrMid = ((u64) IsrWrapperTable[Offset] >> 16) & 0xFFFF;
+            Idt->IsrHigh = ((u64) IsrWrapperTable[Offset] >> 32) & 0xFFFFFFFF;
+            Idt->Reserved = 0;
+        }
 
-            __volatile__ is a addon to __asm__ that ensures that compiler
-            optimizations do not remove the assembly instructions.
+        /*
+            __asm__ executes traditional assembly block and it does 
+            not use GNU Extensions or extended assembly. (GCC asm() 
+            and asm(:)). Furthermore, __volatile__ is an addon to 
+            __asm__ that ensures that compiler optimizations do not 
+            remove the assembly instructions.
+
+            Refer:
+            https://wiki.osdev.org/Inline_Assembly/Examples
         */
 
-        //__asm__ volatile("lidt %0" : : "m"(Idtr));
+        __asm__ volatile("lidt %0" : : "m"(Idtr));
+        //__asm__ volatile("sti");
 
         /* Initialize PIC and Set Interrupt Flag */
-        Pic8259::Initialize();
+        //Pic8259::Initialize();
         //__asm__ volatile("sti");
     }
 

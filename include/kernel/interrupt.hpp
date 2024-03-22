@@ -38,8 +38,8 @@ using namespace tacos::Kernel;
 
 namespace tacos {
 namespace Kernel {
-    /* Define Main Interrupt Handler */
-    extern "C" void InterruptHandler();
+    /* Define Interrupt Handler and Table Defined in ASM */
+    //extern "C" void InterruptHandler();
 
     class Interrupt {
     public:
