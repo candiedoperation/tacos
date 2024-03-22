@@ -39,15 +39,15 @@ using namespace tacos::Kernel;
 namespace tacos {
 namespace Kernel {
     /* Define Main Interrupt Handler */
-    extern "C" void HandleInterrupt(int Code);
+    extern "C" void InterruptHandler();
 
     class Interrupt {
     public:
         struct IdTableEntry {
             u16 IsrLow;
             u16 KernelCs;
-            char Ist;
-            char Attributes;
+            u8 Ist;
+            u8 Attributes;
             u16 IsrMid;
             u32 IsrHigh;
             u32 Reserved;
@@ -58,11 +58,11 @@ namespace Kernel {
             u64 base;
         } __attribute__((packed));
 
+        /* Define a Global Interrupt Descriptor Table */
+        __attribute__((aligned(0x10))) static IdTableEntry IdTable[256];
+        static IdTableRegister Idtr;
+
         static void Register();
-        static void HandleDivByZeroException();
-        static void HandleDoubleFaultException();
-        static void HandlePageFaultException();
-        static void HandleKeyboardInterrupt();
         static void UnhandledException(int Code);
     };
 }
