@@ -23,6 +23,11 @@
 
 using namespace tacos::Kernel;
 
+#define VGATM_MEM_ADDRESS 0xB8000
+#define VGATM_SCR_WIDTH 80
+#define VGATM_SCR_HEIGHT 25
+#define VGATM_SCR_PIXELS 2000 /* Pixels = Width * Height = 2000 */
+
 namespace tacos {
 namespace Drivers {
     namespace Video {
@@ -47,12 +52,11 @@ namespace Drivers {
 
         class VgaTextMode {
         private:
-            static u8 ScreenWidth;
-            static u8 ScreenHeight;
             static u8* MemoryAddress;
             static u16 CursorPos;
 
         public:
+            static void PageDown();
             static void BufferWrite(char* buffer);
             static void BufferWrite(char* buffer, vga_color FgColor, vga_color BgColor);
         };

@@ -23,10 +23,31 @@ using namespace tacos::Drivers::Video;
 using namespace tacos::Kernel;
 
 /* Initialize the Static VGA Buffer Addresses */
-u8* VgaTextMode::MemoryAddress = (u8*)0xB8000;
-u8 VgaTextMode::ScreenWidth = 80;
-u8 VgaTextMode::ScreenHeight = 25;
+u8* VgaTextMode::MemoryAddress = (u8*)VGATM_MEM_ADDRESS;
 u16 VgaTextMode::CursorPos = 0;
+
+/// @brief Handles rudimentary non-buffered page down scroll
+void VgaTextMode::PageDown()
+{
+    /*
+        Scroll Up, Copy lines up and make space at bottom.
+    */
+
+    int SecondLineOffset = VGATM_SCR_WIDTH * 2;
+    for (int Offset = SecondLineOffset; Offset < VGATM_SCR_PIXELS * 2; Offset++) {
+        MemoryAddress[Offset - SecondLineOffset] = MemoryAddress[Offset];
+    }
+
+    /* Clear the Last Line */
+    int LastLineOffset = (VGATM_SCR_WIDTH * (VGATM_SCR_HEIGHT - 1)) * 2;
+    for (int Offset = LastLineOffset; Offset < VGATM_SCR_PIXELS * 2; Offset++) {
+        /* Clear Both Text and Metadata bits */
+        MemoryAddress[Offset] = 0;
+    }
+
+    /* Set Cursor Position to Last Line */
+    CursorPos = (VGATM_SCR_WIDTH * (VGATM_SCR_HEIGHT - 1)) * 2;
+}
 
 void VgaTextMode::BufferWrite(char* buffer)
 {
@@ -37,20 +58,16 @@ void VgaTextMode::BufferWrite(char* buffer)
 void VgaTextMode::BufferWrite(char* buffer, vga_color FgColor, vga_color BgColor)
 {
     for (int i = 0; buffer[i] != '\0'; i++) {
-        int ll = ((int)(((CursorPos + 2) / 2) / ScreenWidth));
-        if (ll >= ScreenHeight) {
-            unsigned short* vm = (unsigned short*)0xb8000;
-            for (int i = 0; i < 2000; i++) {
-                vm[i] = ((unsigned short)0x0f << 8) | 0x00;
-            }
+        /* Calculate Current Line */
+        int CurrentLine = ((int)((CursorPos / 2) / VGATM_SCR_WIDTH));
 
-            CursorPos = 0;
-        }
+        if (CurrentLine >= VGATM_SCR_HEIGHT)
+            PageDown();
 
         if (buffer[i] == '\n') {
             /* Set Cursor Positions for Next Line */
-            int currentLine = ((int)((CursorPos / 2) / ScreenWidth)) + 1;
-            CursorPos = (currentLine * (ScreenWidth * 2));
+            int NextLine = CurrentLine + 1;
+            CursorPos = (NextLine * (VGATM_SCR_WIDTH * 2));
 
             /* Don't Print \n */
             continue;
