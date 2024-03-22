@@ -32,39 +32,20 @@ isr_wrapper_%+%1:
     iretq                  ; Return Instruction 64 bit.
 %endmacro
 
+; Define the External InterruptHandler function. Imple
+; -mentation present in the interrupt.cpp file. Then, 
+; use the NASM preprocessor %rep macro to repeat defining
+; a common interrupt wrapper for N interrupts. Additionally,
+; define total interrupt count for using them in %rep.
+
 extern InterruptHandler
-isr_wrapper 0
-isr_wrapper 1
-isr_wrapper 2
-isr_wrapper 3
-isr_wrapper 4
-isr_wrapper 5
-isr_wrapper 6
-isr_wrapper 7
-isr_wrapper 8
-isr_wrapper 9
-isr_wrapper 10
-isr_wrapper 11
-isr_wrapper 12
-isr_wrapper 13
-isr_wrapper 14
-isr_wrapper 15
-isr_wrapper 16
-isr_wrapper 17
-isr_wrapper 18
-isr_wrapper 19
-isr_wrapper 20
-isr_wrapper 21
-isr_wrapper 22
-isr_wrapper 23
-isr_wrapper 24
-isr_wrapper 25
-isr_wrapper 26
-isr_wrapper 27
-isr_wrapper 28
-isr_wrapper 29
-isr_wrapper 30
-isr_wrapper 31
+%assign isr_count 32
+
+%assign ihctr 0
+%rep isr_count
+    isr_wrapper ihctr
+    %assign ihctr ihctr + 1
+%endrep
 
 ; Define a Global ISR Table that has memory locations
 ; to every isr_wrapper block as defined above. This
@@ -80,7 +61,7 @@ isr_wrapper 31
 global IsrWrapperTable
 IsrWrapperTable:
 %assign ctr 0
-%rep 32
+%rep isr_count
     dq isr_wrapper_%+ctr
     %assign ctr ctr+1
 %endrep
