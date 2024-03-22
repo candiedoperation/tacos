@@ -37,6 +37,16 @@ void VgaTextMode::BufferWrite(char* buffer)
 void VgaTextMode::BufferWrite(char* buffer, vga_color FgColor, vga_color BgColor)
 {
     for (int i = 0; buffer[i] != '\0'; i++) {
+        int ll = ((int)(((CursorPos + 2) / 2) / ScreenWidth));
+        if (ll >= ScreenHeight) {
+            unsigned short* vm = (unsigned short*)0xb8000;
+            for (int i = 0; i < 2000; i++) {
+                vm[i] = ((unsigned short)0x0f << 8) | 0x00;
+            }
+
+            CursorPos = 0;
+        }
+
         if (buffer[i] == '\n') {
             /* Set Cursor Positions for Next Line */
             int currentLine = ((int)((CursorPos / 2) / ScreenWidth)) + 1;
