@@ -105,6 +105,13 @@ void Pic8259::Initialize()
     IO::outb(PIC8259_SLAVE_DATA, mask02);
 }
 
+/// @brief Disables PIC by masking all Interrupts
+void Pic8259::Disable() {
+    /* Mask all Interrupts. Used for IO/APIC. */
+    IO::outb(PIC8259_MASTER_DATA, 0xFF);
+    IO::outb(PIC8259_SLAVE_DATA, 0xFF);
+}
+
 /// @brief Sends EOI Acknowledgement after every Interrupt.
 void Pic8259::EndOfInterrupt(u8 Code)
 {

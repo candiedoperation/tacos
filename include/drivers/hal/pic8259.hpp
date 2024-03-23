@@ -51,6 +51,7 @@ namespace Drivers {
         class Pic8259 {
         public:
             static void Initialize();
+            static void Disable();
             static void EndOfInterrupt(u8 Code);
         };
     }
