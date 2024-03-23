@@ -31,12 +31,38 @@ namespace Kernel {
     extern "C" void* IsrWrapperTable[];
     extern "C" void InterruptHandler(u64 InterruptCode)
     {
-        if (InterruptCode == 32) {
+        /* TODO: Have Binding Functions for Custom Interrupts. */
+        u8 PicIrq = (InterruptCode - PIC8259_MASTER_OFFSET);
+        switch (PicIrq) {
+        case Pic8259::Irq::TIMER: {
             VgaTextMode::BufferWrite(".", VgaTextMode::Color::GREEN, VgaTextMode::Color::BLACK);
-            Pic8259::EndOfInterrupt(32);
-        } else {
-            VgaTextMode::BufferWrite("Exception!");
-            __asm__ volatile ("cli; hlt");
+            Pic8259::EndOfInterrupt(InterruptCode);
+            break;
+        }
+
+        case Pic8259::Irq::KEYBOARD: {
+            /*
+                The keyboard controller won’t send another interrupt until we
+                have read the so-called scancode of the pressed key. To find
+                out which key was pressed, we need to query the keyboard contr
+                -oller. We do this by reading from, 0x60, the data port of the
+                PS/2 controller.
+
+                Refer:
+                https://os.phil-opp.com/hardware-interrupts/#keyboard-input
+                https://wiki.osdev.org/IRQ#Ports
+            */
+
+            u8 ScanCode = IO::inb(0x60);
+            Interrupt::KeyboardInterrupt(ScanCode);
+            Pic8259::EndOfInterrupt(InterruptCode);
+            break;
+        }
+
+        default: {
+            VgaTextMode::BufferWrite("Unhandled PIC Interrupt!");
+            __asm__ volatile("cli; hlt");
+        }
         }
     }
 
@@ -89,6 +115,18 @@ namespace Kernel {
         /* Write Exception Output and Halt CPU */
         VgaTextMode::BufferWrite(exception);
         __asm__ __volatile__("cli; hlt");
+    }
+
+    /// @brief Kernel Keyboard Interrupts, Controller Independent.
+    void Interrupt::KeyboardInterrupt(u8 KeyCode)
+    {
+        /* TODO: Move code if IO/APIC parsing is different from PIC 8259! */
+        /* TODO: Have a Keyboard Controller Driver. Store Key presses, etc. */
+
+        char* a = " ";
+        a[0] = KeyCode;
+
+        VgaTextMode::BufferWrite(a);
     }
 }
 }

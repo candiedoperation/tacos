@@ -41,15 +41,37 @@ using namespace tacos::Kernel;
 
 #define PIC8259_MASTER 0x0020
 #define PIC8259_MASTER_DATA 0x0021
+#define PIC8259_MASTER_OFFSET 32
 
 #define PIC8259_SLAVE 0x00A0
 #define PIC8259_SLAVE_DATA 0x00A1
+#define PIC8259_SLAVE_OFFSET (PIC8259_MASTER_OFFSET + 8)
 
 namespace tacos {
 namespace Drivers {
     namespace HAL {
         class Pic8259 {
         public:
+            /// @brief Standard ISA Interrupt Request Codes
+            enum Irq {
+                TIMER = 0,
+                KEYBOARD = 1,
+                CASCADE = 2,
+                COM2 = 3,
+                COM1 = 4,
+                LPT2 = 5,
+                FLOPPY_DISK = 6,
+                LPT1 = 7, /* Usually the Spurious Interrupt. IRQ 7 */
+                CMOS_RTC = 8,
+                CUSTOM01 = 9,
+                CUSTOM02 = 10,
+                CUSTOM03 = 11,
+                PS2_MOUSE = 12,
+                FPU = 13,
+                ATA_HDD_1 = 14,
+                ATA_HDD_2 = 15
+            };
+
             static void Initialize();
             static void Disable();
             static void EndOfInterrupt(u8 Code);

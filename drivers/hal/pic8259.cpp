@@ -68,12 +68,9 @@ void Pic8259::Initialize()
     */
 
     /* Set Offset. Protected and Long modes reserve interrupts 0-31 for CPU */
-    const u8 MASTER_OFFSET = 32;
-    const u8 SLAVE_OFFSET = (MASTER_OFFSET + 8);
-
-    IO::outb(PIC8259_MASTER_DATA, MASTER_OFFSET);
+    IO::outb(PIC8259_MASTER_DATA, PIC8259_MASTER_OFFSET);
     IO::wait();
-    IO::outb(PIC8259_SLAVE_DATA, SLAVE_OFFSET);
+    IO::outb(PIC8259_SLAVE_DATA, PIC8259_SLAVE_OFFSET);
     IO::wait();
 
     /*

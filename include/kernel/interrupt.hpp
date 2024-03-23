@@ -83,6 +83,9 @@ namespace Kernel {
 
         static void Register();
         static void UnhandledException(int Code);
+
+        /* Define Standard Kernel Interrupts */
+        static void KeyboardInterrupt(u8 KeyCode);
     };
 }
 }
