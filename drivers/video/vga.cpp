@@ -52,10 +52,10 @@ void VgaTextMode::PageDown()
 void VgaTextMode::BufferWrite(char* buffer)
 {
     /* Use Default Colors */
-    BufferWrite(buffer, vga_color::WHITE, vga_color::BLACK);
+    BufferWrite(buffer, Color::WHITE, Color::BLACK);
 }
 
-void VgaTextMode::BufferWrite(char* buffer, vga_color FgColor, vga_color BgColor)
+void VgaTextMode::BufferWrite(char* buffer, Color FgColor, Color BgColor)
 {
     for (int i = 0; buffer[i] != '\0'; i++) {
         /* Calculate Current Line */

@@ -45,7 +45,7 @@ void init_acpi()
 
         case AcpiDef::TWO: {
             VgaTextMode::BufferWrite("ACPI Version 2.0\n");
-            AcpiDef::Xsdt* Xsdt = (AcpiDef::Xsdt*) Rsdp->XsdtAddress;
+            AcpiDef::Xsdt* Xsdt = (AcpiDef::Xsdt*)Rsdp->XsdtAddress;
             AcpiDef::GetTableBySignature(0, Xsdt, 0);
             break;
         }
@@ -66,14 +66,14 @@ extern "C" void LoadKernel()
     /* Kernel Entrypoint */
     clear_screen();
 
-    VgaTextMode::BufferWrite("tacOS Kernel Initializing...\n", vga_color::YELLOW, vga_color::BLACK);
+    VgaTextMode::BufferWrite("tacOS Kernel Initializing...\n", VgaTextMode::Color::YELLOW, VgaTextMode::Color::BLACK);
 
     init_acpi();
     Interrupt::Register();
 
     /* Check if Interrupts Work! */
-    //int DivByZ = 1 / 0;
-    //int DivByZ2 = 1/0;
+    // int DivByZ = 1 / 0;
+    // int DivByZ2 = 1/0;
 
     for (;;) {
         /*

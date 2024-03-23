@@ -31,34 +31,34 @@ using namespace tacos::Kernel;
 namespace tacos {
 namespace Drivers {
     namespace Video {
-        enum vga_color {
-            BLACK = 0x0,
-            BLUE = 0x1,
-            GREEN = 0x2,
-            CYAN = 0x3,
-            RED = 0x4,
-            MAGENTA = 0x5,
-            BROWN = 0x6,
-            LIGHT_GRAY = 0x7,
-            DARK_GRAY = 0x8,
-            LIGHT_BLUE = 0x9,
-            LIGHT_GREEN = 0xa,
-            LIGHT_CYAN = 0xb,
-            LIGHT_RED = 0xc,
-            PINK = 0xd,
-            YELLOW = 0xe,
-            WHITE = 0xf
-        };
-
         class VgaTextMode {
         private:
             static u8* MemoryAddress;
             static u16 CursorPos;
 
         public:
+            enum Color {
+                BLACK = 0x0,
+                BLUE = 0x1,
+                GREEN = 0x2,
+                CYAN = 0x3,
+                RED = 0x4,
+                MAGENTA = 0x5,
+                BROWN = 0x6,
+                LIGHT_GRAY = 0x7,
+                DARK_GRAY = 0x8,
+                LIGHT_BLUE = 0x9,
+                LIGHT_GREEN = 0xa,
+                LIGHT_CYAN = 0xb,
+                LIGHT_RED = 0xc,
+                PINK = 0xd,
+                YELLOW = 0xe,
+                WHITE = 0xf
+            };
+
             static void PageDown();
             static void BufferWrite(char* buffer);
-            static void BufferWrite(char* buffer, vga_color FgColor, vga_color BgColor);
+            static void BufferWrite(char* buffer, Color FgColor, Color BgColor);
         };
     }
 }

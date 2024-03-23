@@ -30,7 +30,7 @@ namespace tacos {
 namespace Kernel {
     extern "C" void* IsrWrapperTable[];
     extern "C" void InterruptHandler() {
-        VgaTextMode::BufferWrite("uhoh\n");
+        VgaTextMode::BufferWrite(".", VgaTextMode::Color::GREEN, VgaTextMode::Color::BLACK);
         Pic8259::EndOfInterrupt(32);
         //__asm__ volatile ("cli; hlt");
     }
