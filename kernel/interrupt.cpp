@@ -29,10 +29,15 @@ using namespace tacos::ASM;
 namespace tacos {
 namespace Kernel {
     extern "C" void* IsrWrapperTable[];
-    extern "C" void InterruptHandler() {
-        VgaTextMode::BufferWrite(".", VgaTextMode::Color::GREEN, VgaTextMode::Color::BLACK);
-        Pic8259::EndOfInterrupt(32);
-        //__asm__ volatile ("cli; hlt");
+    extern "C" void InterruptHandler(u64 InterruptCode)
+    {
+        if (InterruptCode == 32) {
+            VgaTextMode::BufferWrite(".", VgaTextMode::Color::GREEN, VgaTextMode::Color::BLACK);
+            Pic8259::EndOfInterrupt(32);
+        } else {
+            VgaTextMode::BufferWrite("Exception!");
+            __asm__ volatile ("cli; hlt");
+        }
     }
 
     void Interrupt::Register()
@@ -48,12 +53,12 @@ namespace Kernel {
         /* Populate the Interrupt Descriptor Table */
         for (u8 Offset = 0; Offset < INTERRUPT_ISRCOUNT; Offset++) {
             IdTableEntry* Idt = &IdTable[Offset];
-            Idt->IsrLow = ((u64) IsrWrapperTable[Offset]) & 0xFFFF;
+            Idt->IsrLow = ((u64)IsrWrapperTable[Offset]) & 0xFFFF;
             Idt->KernelCs = 0x08; /* What's GDT_OFFSET_KERNEL_CODE? */
             Idt->Ist = 0;
             Idt->Attributes = 0x8E; /* What's this Flag? */
-            Idt->IsrMid = ((u64) IsrWrapperTable[Offset] >> 16) & 0xFFFF;
-            Idt->IsrHigh = ((u64) IsrWrapperTable[Offset] >> 32) & 0xFFFFFFFF;
+            Idt->IsrMid = ((u64)IsrWrapperTable[Offset] >> 16) & 0xFFFF;
+            Idt->IsrHigh = ((u64)IsrWrapperTable[Offset] >> 32) & 0xFFFFFFFF;
             Idt->Reserved = 0;
         }
 
@@ -61,10 +66,10 @@ namespace Kernel {
         Pic8259::Initialize();
 
         /*
-            __asm__ executes traditional assembly block and it does 
-            not use GNU Extensions or extended assembly. (GCC asm() 
-            and asm(:)). Furthermore, __volatile__ is an addon to 
-            __asm__ that ensures that compiler optimizations do not 
+            __asm__ executes traditional assembly block and it does
+            not use GNU Extensions or extended assembly. (GCC asm()
+            and asm(:)). Furthermore, __volatile__ is an addon to
+            __asm__ that ensures that compiler optimizations do not
             remove the assembly instructions.
 
             Refer:

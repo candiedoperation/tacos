@@ -101,8 +101,8 @@ void Pic8259::Initialize()
     IO::wait();
 
     /* Restore the Masks in Both PICs. Then, they're ready for interrupts */
-    IO::outb(PIC8259_MASTER_DATA, 0xfe); // Take Just Keyboard inputs now.
-    IO::outb(PIC8259_SLAVE_DATA, 0xff);
+    IO::outb(PIC8259_MASTER_DATA, mask01);
+    IO::outb(PIC8259_SLAVE_DATA, mask02);
 }
 
 /// @brief Sends EOI Acknowledgement after every Interrupt.

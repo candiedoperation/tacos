@@ -28,7 +28,7 @@ using namespace tacos::Kernel;
 namespace tacos {
 namespace Kernel {
     /* Define Interrupt Handler and Table Defined in ASM */
-    //extern "C" void InterruptHandler();
+    // extern "C" void InterruptHandler();
 
     class Interrupt {
     public:
@@ -45,6 +45,40 @@ namespace Kernel {
         struct IdTableRegister {
             u16 limit;
             u64 base;
+        } __attribute__((packed));
+
+        /// @brief Current CPU Registers saved in Stack
+        struct CpuState {
+            u64 Rax;
+            u64 Rbx;
+            u64 Rcx;
+            u64 Rdx;
+            u64 Rbp;
+            u64 Rsp;
+            u64 Rsi;
+            u64 Rdi;
+            u64 R8;
+            u64 R9;
+            u64 R10;
+            u64 R11;
+            u64 R12;
+            u64 R13;
+            u64 R14;
+            u64 R15;
+        } __attribute__((packed));
+
+        /// @brief Interrupt Info pushed to Stack by CPU
+        struct StackState {
+            u64 ErrorCode;
+            u64 Eip;
+            u64 CS;
+            u64 Eflags;
+        } __attribute__((packed));
+
+        struct EC {
+            u64 EC;
+            u64 EC2;
+            u64 EC3;
         } __attribute__((packed));
 
         static void Register();

@@ -29,8 +29,38 @@
 
 %macro isr_wrapper 1
 isr_wrapper_%+%1:
+
+    ; Providing parameters to CPP functions in long mode:
+    ; After mutliple failed attempts of using the 'push'
+    ; instruction in x64, I resorted to manually moving
+    ; the parameters to the registers.
+    ;
+    ; In x86-64 calling convention, the first six integer or 
+    ; pointer parameters are passed in registers (rdi, rsi, 
+    ; rdx, rcx, r8, r9), and any additional parameters are 
+    ; passed on the stack.
+    ;
+    ; Example:
+    ; mov rdi, 66             ; First parameter
+    ; mov rsi, 65             ; Second parameter
+    ; mov rdx, 64             ; Third parameter
+    ; mov rcx, 63             ; Fourth parameter
+    ; mov r8, 62              ; Fifth parameter
+    ; mov r9, 61              ; Sixth parameter
+    ; sub rsp, 40             ; Allocate space for additional parameters on the stack
+    ;
+    ; mov qword [rsp], 60     ; Seventh parameter
+    ; mov qword [rsp + 8], 59 ; Eighth parameter
+    ;
+    ; add rsp, 40             ; Restore the stack pointer after the call
+
+    mov rdi, %+%1          ; Interrupt Code Parameter
+    sub rsp, 8             ; Align the stack
     call InterruptHandler  ; Call External C++ InterruptHandler
-    iretq                  ; Return Instruction 64 bit.
+    add rsp, 8             ; Restore the stack pointer (u64 is 8 bytes)
+
+    ; Return from Interrupt (64 bit instruction).
+    iretq
 %endmacro
 
 ; Define the External InterruptHandler function. Imple
