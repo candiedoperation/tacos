@@ -177,3 +177,7 @@ static const VirtualKbd::VKey ScanCodeS2[512] = {
     VirtualKbd::VKey::RESERVED,
     VirtualKbd::VKey::F7
 };
+
+void Ps2Kbd::KeyboardInterrupt(u8 ScanCode) {
+    
+}

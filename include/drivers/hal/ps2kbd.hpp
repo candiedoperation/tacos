@@ -20,13 +20,19 @@
 #define DRIVERS_HAL_PS2KBD_HPP
 
 #include <drivers/hal/virtkbd.hpp>
+#include <kernel/types.hpp>
+
+using namespace tacos::Kernel;
 
 namespace tacos {
 namespace Drivers {
     namespace HAL {
         class Ps2Kbd {
         public:
+            static const VirtualKbd::VKey ScanCodeS1[512];
             static const VirtualKbd::VKey ScanCodeS2[512];
+
+            static void KeyboardInterrupt(u8 ScanCode);
         };
     }
 }

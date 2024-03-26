@@ -18,7 +18,10 @@
 
 #include <asm/io.hpp>
 #include <drivers/hal/pic8259.hpp>
+#include <drivers/hal/ps2kbd.hpp>
+#include <drivers/video/vga.hpp> // REMOVE IN FUTURE WHEN APIs ARE IMPL.
 
+using namespace tacos::Drivers::Video; // REMOVE IN FUTURE WHEN APIs ARE IMPL.
 using namespace tacos::Drivers::HAL;
 using namespace tacos::ASM;
 
@@ -85,7 +88,7 @@ void Pic8259::Initialize()
 
     const u8 MASTER_ICW3 = 0b00000100; /* Slave at 2rd IRQ */
     const u8 SLAVE_ICW3 = 0b00000010; /* Slave ID is 2 */
-    
+
     IO::outb(PIC8259_MASTER_DATA, MASTER_ICW3);
     IO::wait();
     IO::outb(PIC8259_SLAVE_DATA, SLAVE_ICW3);
@@ -103,7 +106,8 @@ void Pic8259::Initialize()
 }
 
 /// @brief Disables PIC by masking all Interrupts
-void Pic8259::Disable() {
+void Pic8259::Disable()
+{
     /* Mask all Interrupts. Used for IO/APIC. */
     IO::outb(PIC8259_MASTER_DATA, 0xFF);
     IO::outb(PIC8259_SLAVE_DATA, 0xFF);
@@ -126,3 +130,56 @@ void Pic8259::EndOfInterrupt(u8 Code)
 
     IO::outb(PIC8259_MASTER, PIC8259_EOI);
 }
+
+void Pic8259::TranslateInterrupt(u8 InterruptCode)
+{
+    u8 PicIrq = (InterruptCode - PIC8259_MASTER_OFFSET);
+    switch (PicIrq) {
+    case Pic8259::Irq::TIMER: {
+        VgaTextMode::BufferWrite(".", VgaTextMode::Color::GREEN, VgaTextMode::Color::BLACK);
+        Pic8259::EndOfInterrupt(InterruptCode);
+        break;
+    }
+
+    case Pic8259::Irq::KEYBOARD: {
+        /*
+            PS/2 Keyboard Interrupts and emulated interrupts for USB HID 
+            Keyboards (emulated) are triggered here.
+
+            The keyboard controller won’t send another interrupt until we
+            have read the so-called scancode of the pressed key. To find
+            out which key was pressed, we need to query the keyboard contr
+            -oller. We do this by reading from, 0x60, the data port of the
+            PS/2 controller.
+
+            Refer:
+            https://os.phil-opp.com/hardware-interrupts/#keyboard-input
+            https://wiki.osdev.org/USB_Human_Interface_Devices
+            https://wiki.osdev.org/IRQ#Ports
+        */
+
+        u8 ScanCode = IO::inb(0x60);
+        Ps2Kbd::KeyboardInterrupt(ScanCode);        
+        Pic8259::EndOfInterrupt(InterruptCode);
+        break;
+    }
+
+    default: {
+        VgaTextMode::BufferWrite("Unhandled PIC Interrupt!");
+        break;
+    }
+    }
+}
+
+
+// /// @brief Kernel Keyboard Interrupts, Controller Independent.
+// void Interrupt::KeyboardInterrupt(u8 KeyCode)
+// {
+//     /* TODO: Move code if IO/APIC parsing is different from PIC 8259! */
+//     /* TODO: Have a Keyboard Controller Driver. Store Key presses, etc. */
+
+//     char* a = " ";
+//     a[0] = KeyCode;
+
+//     VgaTextMode::BufferWrite(a);
+// }

@@ -46,6 +46,8 @@ using namespace tacos::Kernel;
 #define PIC8259_SLAVE 0x00A0
 #define PIC8259_SLAVE_DATA 0x00A1
 #define PIC8259_SLAVE_OFFSET (PIC8259_MASTER_OFFSET + 8)
+#define PIC8259_MIN_IRQ PIC8259_MASTER_OFFSET
+#define PIC8259_MAX_IRQ (PIC8259_SLAVE_OFFSET + 8)
 
 namespace tacos {
 namespace Drivers {
@@ -75,6 +77,7 @@ namespace Drivers {
             static void Initialize();
             static void Disable();
             static void EndOfInterrupt(u8 Code);
+            static void TranslateInterrupt(u8 InterruptCode);
         };
     }
 }
