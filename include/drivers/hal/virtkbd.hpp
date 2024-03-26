@@ -16,10 +16,14 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#ifndef DRIVERS_HAL_VIRTKBD_HPP
+#define DRIVERS_HAL_VIRTKBD_HPP
+
 namespace tacos {
 namespace Drivers {
     namespace HAL {
         class VirtualKbd {
+        public:
             /// @brief tacOS Kernel Keycodes.
             enum VKey {
                 /*
@@ -125,10 +129,17 @@ namespace Drivers {
                 KPPLUS = 78,
                 KP1 = 79,
                 KP2 = 80,
+                KP3 = 81,
                 KP0 = 82,
                 KPDOT = 83,
+
+                /* Japanese Keys Omitted. Fix in Future. */
+                F11 = 87,
+                F12 = 88,
             };
         };
     }
 }
 }
+
+#endif

@@ -16,12 +16,20 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#ifndef DRIVERS_HAL_PS2KBD_HPP
+#define DRIVERS_HAL_PS2KBD_HPP
+
+#include <drivers/hal/virtkbd.hpp>
+
 namespace tacos {
 namespace Drivers {
     namespace HAL {
         class Ps2Kbd {
-             
+        public:
+            static const VirtualKbd::VKey ScanCodeS2[512];
         };
     }
 }
 }
+
+#endif
