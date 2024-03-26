@@ -199,8 +199,8 @@ namespace Drivers {
 
                 /* CPU Power Profile (C State) Fields */
                 u8 CStateControl;
-                u16 CState2SwitchLatency; /* Worst Latency is toggling C2 State */
-                u16 CState3SwitchLatency; /* Worst Latency is toggling C3 State */
+                u16 CState2SwitchLatency; /* Worst Latency in toggling C2 State */
+                u16 CState3SwitchLatency; /* Worst Latency in toggling C3 State */
 
                 u16 FlushSize;
                 u16 FlushStride;

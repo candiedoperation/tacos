@@ -7,9 +7,11 @@ LD_PARAMETERS = -n
 BUILD_PATH = build
 KRNL_DEPENDENCIES = $(BUILD_PATH)/osloader/osloader.o \
 					$(BUILD_PATH)/osloader/os64loader.o \
+					$(BUILD_PATH)/drivers/hal/pic8259.o \
+					$(BUILD_PATH)/drivers/hal/virtkbd.o \
+					$(BUILD_PATH)/drivers/hal/ps2kbd.o \
 					$(BUILD_PATH)/drivers/acpi/acpidef.o \
 					$(BUILD_PATH)/drivers/video/vga.o \
-					$(BUILD_PATH)/drivers/hal/pic8259.o \
 					$(BUILD_PATH)/kernel/isrdef.o \
 					$(BUILD_PATH)/kernel/interrupt.o \
 					$(BUILD_PATH)/kernel/tacoskrnl.o

@@ -27,9 +27,6 @@ using namespace tacos::Kernel;
 
 namespace tacos {
 namespace Kernel {
-    /* Define Interrupt Handler and Table Defined in ASM */
-    // extern "C" void InterruptHandler();
-
     class Interrupt {
     public:
         struct IdTableEntry {
@@ -75,16 +72,11 @@ namespace Kernel {
             u64 Eflags;
         } __attribute__((packed));
 
-        struct EC {
-            u64 EC;
-            u64 EC2;
-            u64 EC3;
-        } __attribute__((packed));
-
         static void Register();
         static void UnhandledException(int Code);
 
         /* Define Standard Kernel Interrupts */
+        static void CpuException(u8 InterruptCode);
         static void KeyboardInterrupt(u8 KeyCode);
     };
 }

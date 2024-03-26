@@ -71,9 +71,8 @@ extern "C" void LoadKernel()
     init_acpi();
     Interrupt::Register();
 
-    /* Check if Interrupts Work! */
-    // int DivByZ = 1 / 0;
-    // int DivByZ2 = 1/0;
+    /* Check if CPU Exceptions and Interrupts Interrupts Work! */
+    //int DivByZ = 1/0;
 
     for (;;) {
         /*
