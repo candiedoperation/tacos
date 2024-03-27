@@ -29,9 +29,6 @@ namespace Drivers {
     namespace HAL {
         class Ps2Kbd {
         public:
-            static const VirtualKbd::VKey ScanCodeS1[512];
-            static const VirtualKbd::VKey ScanCodeS2[512];
-
             static void KeyboardInterrupt(u8 ScanCode);
         };
     }

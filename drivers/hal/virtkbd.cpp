@@ -17,5 +17,18 @@
 */
 
 #include <drivers/hal/virtkbd.hpp>
+#include <drivers/video/vga.hpp>
 
 using namespace tacos::Drivers::HAL;
+using namespace tacos::Drivers::Video;
+
+u8 VirtualKbd::GetAsciiCode(VKey KeyCode) {
+    return KeyCode + 65;
+}
+
+void VirtualKbd::KeyPressed(VKey KeyCode) {
+    char a[2];
+    a[0] = GetAsciiCode(KeyCode);
+    a[1] = '\0';
+    VgaTextMode::BufferWrite(a);
+}

@@ -20,8 +20,9 @@
 
 using namespace tacos::Drivers::HAL;
 
-static const VirtualKbd::VKey ScanCodeS1 = {
-
+/// @brief PS/2 Keyboard Scan Code Set 01
+static const VirtualKbd::VKey ScanCodeS1[512] = {
+    
 };
 
 /// @brief PS/2 Keyboard Scan Code Set 02
@@ -29,14 +30,14 @@ static const VirtualKbd::VKey ScanCodeS2[512] = {
     /*
         Consists of Scan Code definitions from the second set
         of PS/2 scancodes mapped with tacOS Virtual Keys. The
-        PS/2 Scan Code (Set 02) value for F9 is 0x01. This 
+        PS/2 Scan Code (Set 02) value for F9 is 0x01. This
         array maps such that ScanCodeS2[0x01] = VirtualKbd::VKey::F9.
-        
+
         Refer:
         https://wiki.osdev.org/PS2_Keyboard#Scan_Code_Set_2
         http://lxr.linux.no/#linux+v3.5.4/drivers/input/keyboard/atkbd.c
     */
-    
+
     VirtualKbd::VKey::RESERVED,
     VirtualKbd::VKey::F9,
     VirtualKbd::VKey::RESERVED,
@@ -163,7 +164,7 @@ static const VirtualKbd::VKey ScanCodeS2[512] = {
     VirtualKbd::VKey::KP8,
     VirtualKbd::VKey::ESC,
     VirtualKbd::VKey::NUMLOCK,
-    
+
     VirtualKbd::VKey::F11,
     VirtualKbd::VKey::KPPLUS,
     VirtualKbd::VKey::KP3,
@@ -178,6 +179,25 @@ static const VirtualKbd::VKey ScanCodeS2[512] = {
     VirtualKbd::VKey::F7
 };
 
-void Ps2Kbd::KeyboardInterrupt(u8 ScanCode) {
+/// @brief Handle PS/2 Keyboard Interrupts, Translate to VKey Inputs.
+/// @param ScanCode Scan Code obtained from PS/2 Controller
+void Ps2Kbd::KeyboardInterrupt(u8 ScanCode)
+{
+    /*
+        This routine handles converting PS/2 Keyboard inputs,
+        based on the current controller settings, into tacOS
+        Virtual Keyboard inputs.
+
+        Refer:
+        https://wiki.osdev.org/PS2_Keyboard#Scan_Code_Sets.2C_Scan_Codes_and_Key_Codes
+    */
+
+    /* TODO: get code based on current key set */
+    VirtualKbd::VKey Code = ScanCodeS1[ScanCode];
     
+    if (ScanCode == 0x81)
+        VirtualKbd::KeyPressed(VirtualKbd::VK_K);
+
+    //if((ScanCode & 128) != 128)
+    //    VirtualKbd::KeyPressed(Code);
 }

@@ -19,6 +19,10 @@
 #ifndef DRIVERS_HAL_VIRTKBD_HPP
 #define DRIVERS_HAL_VIRTKBD_HPP
 
+#include <kernel/types.hpp>
+
+using namespace tacos::Kernel;
+
 namespace tacos {
 namespace Drivers {
     namespace HAL {
@@ -137,6 +141,9 @@ namespace Drivers {
                 F11 = 87,
                 F12 = 88,
             };
+
+            static u8 GetAsciiCode(VKey KeyCode);
+            static void KeyPressed(VKey KeyCode);
         };
     }
 }
