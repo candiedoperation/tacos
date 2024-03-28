@@ -22,6 +22,9 @@
 using namespace tacos::Drivers::HAL;
 using namespace tacos::Drivers::Video;
 
+/* Initialize Static Variables */
+bool VirtualKbd::CapsLockOn = false;
+
 /// @brief Array that maps VKey Codes to ASCII Characters
 static const u8 AsciiKeycodeMap[VIRTKBD_MAX_VKEY] = {
     0x00, 0x00, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37,
@@ -36,12 +39,42 @@ static const u8 AsciiKeycodeMap[VIRTKBD_MAX_VKEY] = {
     0x33, 0x30, 0x2E
 };
 
+/// @brief Returns the Type of KeyCode
+/// @param KeyCode tacOS Virtual Key Code
+/// @return 0 for Miscellaneous, 1 for Alphabet
+u8 VirtualKbd::GetVKeyType(VKey KeyCode)
+{
+    if ((VKey::VK_Q <= KeyCode && KeyCode <= VKey::VK_P)
+        || (VKey::VK_A <= KeyCode && KeyCode <= VKey::VK_L)
+        || (VKey::VK_Z <= KeyCode && KeyCode <= VKey::VK_M))
+        return 1;
+    else
+        return 0;
+}
+
 void VirtualKbd::KeyPressed(VKey KeyCode)
 {
     /* If Caps Lock Toggled? -> Add Offset for small chars */
     /* Future: Move ASCII Stuff to userspace from Kernel Layer */
 
-    char* input = " ";
-    input[0] = AsciiKeycodeMap[KeyCode];
-    VgaTextMode::BufferWrite(input);
+    switch (KeyCode) {
+    case VKey::CAPSLOCK: {
+        CapsLockOn = !CapsLockOn;
+        break;
+    }
+
+    default: {
+        /* Get ASCII Code for current Virtual Key Code */
+        u8 AsciiCode = AsciiKeycodeMap[KeyCode];
+
+        /* For small letters, shift retreived ASCII code by 32 (A = 65, a = 97) */
+        if (!CapsLockOn && (GetVKeyType(KeyCode) == 1))
+            AsciiCode += 32;
+
+        char* input = " ";
+        input[0] = AsciiCode;
+        VgaTextMode::BufferWrite(input);
+        break;
+    }
+    }
 }

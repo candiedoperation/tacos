@@ -30,6 +30,9 @@ namespace Drivers {
     namespace HAL {
         class VirtualKbd {
         public:
+            /* Define Key States */
+            static bool CapsLockOn;
+
             /// @brief tacOS Kernel Keycodes.
             enum VKey {
                 /*
@@ -144,7 +147,7 @@ namespace Drivers {
                 F12 = 88,
             };
 
-            static u8 GetAsciiCode(VKey KeyCode);
+            static u8 GetVKeyType(VKey KeyCode);
             static void KeyPressed(VKey KeyCode);
         };
     }
