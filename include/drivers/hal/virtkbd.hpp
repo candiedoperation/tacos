@@ -23,6 +23,8 @@
 
 using namespace tacos::Kernel;
 
+#define VIRTKBD_MAX_VKEY 256
+
 namespace tacos {
 namespace Drivers {
     namespace HAL {
