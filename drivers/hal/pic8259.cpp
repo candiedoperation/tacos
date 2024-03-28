@@ -136,7 +136,7 @@ void Pic8259::TranslateInterrupt(u8 InterruptCode)
     u8 PicIrq = (InterruptCode - PIC8259_MASTER_OFFSET);
     switch (PicIrq) {
     case Pic8259::Irq::TIMER: {
-        VgaTextMode::BufferWrite(".", VgaTextMode::Color::GREEN, VgaTextMode::Color::BLACK);
+        //VgaTextMode::BufferWrite(".", VgaTextMode::Color::GREEN, VgaTextMode::Color::BLACK);
         Pic8259::EndOfInterrupt(InterruptCode);
         break;
     }

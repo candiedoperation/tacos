@@ -22,11 +22,37 @@
 using namespace tacos::Drivers::HAL;
 using namespace tacos::Drivers::Video;
 
-u8 VirtualKbd::GetAsciiCode(VKey KeyCode) {
-    return KeyCode + 65;
+u8 VirtualKbd::GetAsciiCode(VKey KeyCode)
+{
+    /* FUTURE IMPL SHOULD INVOLVE CURRENT CHARSET, LANGUAGE */
+    switch (KeyCode) {
+    case VKey::VK_0:
+        return 0x30;
+    case VKey::VK_1:
+        return 0x31;
+    case VKey::VK_2:
+        return 0x32;
+    case VKey::VK_3:
+        return 0x33;
+    case VKey::VK_4:
+        return 0x34;
+    case VKey::VK_5:
+        return 0x35;
+    case VKey::VK_6:
+        return 0x36;
+    case VKey::VK_7:
+        return 0x37;
+    case VKey::VK_8:
+        return 0x38;
+    case VKey::VK_9:
+        return 0x39;
+    default:
+        return 0;
+    }
 }
 
-void VirtualKbd::KeyPressed(VKey KeyCode) {
+void VirtualKbd::KeyPressed(VKey KeyCode)
+{
     char a[2];
     a[0] = GetAsciiCode(KeyCode);
     a[1] = '\0';
