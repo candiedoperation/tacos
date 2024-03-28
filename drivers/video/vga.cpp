@@ -47,10 +47,8 @@ void VgaTextMode::PageDown()
 }
 
 /// @brief Handles Backspace Requests
-void VgaTextMode::Backspace() {
-    MemoryAddress[CursorPos - 2] = 0; /* Previous TextInfo Cursor */
-    MemoryAddress[CursorPos - 1] = 0; /* Previous TextAttr Cursor */
-    CursorPos -= 2;
+void VgaTextMode::Backspace()
+{
 }
 
 void VgaTextMode::BufferWrite(char* buffer)
@@ -68,12 +66,21 @@ void VgaTextMode::BufferWrite(char* buffer, Color FgColor, Color BgColor)
         if (CurrentLine >= VGATM_SCR_HEIGHT)
             PageDown();
 
+        /* 0x0A (Line Feed) is \n */
         if (buffer[i] == '\n') {
             /* Set Cursor Positions for Next Line */
             int NextLine = CurrentLine + 1;
             CursorPos = (NextLine * (VGATM_SCR_WIDTH * 2));
 
             /* Don't Print \n */
+            continue;
+        }
+
+        /* 0x08 (Backspace ASCII) */
+        if (buffer[i] == 0x08) {
+            MemoryAddress[CursorPos - 2] = 0; /* Previous TextInfo Cursor */
+            MemoryAddress[CursorPos - 1] = 0; /* Previous TextAttr Cursor */
+            CursorPos -= 2;
             continue;
         }
 
