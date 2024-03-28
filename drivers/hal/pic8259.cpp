@@ -18,7 +18,7 @@
 
 #include <asm/io.hpp>
 #include <drivers/hal/pic8259.hpp>
-#include <drivers/hal/ps2kbd.hpp>
+#include <drivers/ps2/ps2kbd.hpp>
 #include <drivers/video/vga.hpp> // REMOVE IN FUTURE WHEN APIs ARE IMPL.
 
 using namespace tacos::Drivers::Video; // REMOVE IN FUTURE WHEN APIs ARE IMPL.

@@ -18,9 +18,11 @@
 
 #include <drivers/video/vga.hpp>
 #include <kernel/types.hpp>
+#include <asm/io.hpp>
 
 using namespace tacos::Drivers::Video;
 using namespace tacos::Kernel;
+using namespace tacos::ASM;
 
 /* Initialize the Static VGA Buffer Addresses */
 u8* VgaTextMode::MemoryAddress = (u8*)VGATM_MEM_ADDRESS;
@@ -60,7 +62,8 @@ void VgaTextMode::BufferWrite(char* buffer)
 void VgaTextMode::BufferWrite(char* buffer, Color FgColor, Color BgColor)
 {
     for (int i = 0; buffer[i] != '\0'; i++) {
-        /* Calculate Current Line */
+        /* Calculate Current Line and Text Properties */
+        u8 TextProperties = ((u8)BgColor << 4) | ((u8)FgColor);
         int CurrentLine = ((int)((CursorPos / 2) / VGATM_SCR_WIDTH));
 
         if (CurrentLine >= VGATM_SCR_HEIGHT)
@@ -79,16 +82,28 @@ void VgaTextMode::BufferWrite(char* buffer, Color FgColor, Color BgColor)
         /* 0x08 (Backspace ASCII) */
         if (buffer[i] == 0x08) {
             MemoryAddress[CursorPos - 2] = 0; /* Previous TextInfo Cursor */
-            MemoryAddress[CursorPos - 1] = 0; /* Previous TextAttr Cursor */
+            MemoryAddress[CursorPos - 1] = TextProperties; /* Previous TextAttr Cursor */
             CursorPos -= 2;
             continue;
         }
 
-        u8 TextProperties = ((u8)BgColor << 4) | ((u8)FgColor);
+        /* Update Memory Location */
         MemoryAddress[CursorPos] = buffer[i];
         MemoryAddress[CursorPos + 1] = TextProperties;
 
         /* Move Memory Position */
         CursorPos += 2;
     }
+
+    /* Update the VGA Text Mode Cursor */
+    // Temporary Impl. Write Drivers. RN, grub enables cursor. fix that.
+    
+    /* Calculate Current Line */
+    u16 pos = CursorPos / 2;
+
+    IO::outb(0x3D4, 0x0F);
+    IO::outb(0x3D5, (u8) (pos & 0xFF));
+
+    IO::outb(0x3D4, 0x0E);
+	IO::outb(0x3D5, (u8) ((pos >> 8) & 0xFF));
 }
