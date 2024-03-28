@@ -41,8 +41,22 @@ void VirtualKbd::KeyPressed(VKey KeyCode)
     /* If Caps Lock Toggled? -> Add Offset for small chars */
     /* Future: Move ASCII Stuff to userspace from Kernel Layer */
 
-    char a[2];
-    a[0] = AsciiKeycodeMap[KeyCode];
-    a[1] = '\0';
-    VgaTextMode::BufferWrite(a);
+    switch (KeyCode) {
+    case VKey::BACKSPACE: {
+        VgaTextMode::Backspace();
+        break;
+    }
+
+    case VKey::ENTER: {
+        VgaTextMode::BufferWrite("\n");
+        break;
+    }
+
+    default: {
+        char* input = " ";
+        input[0] = AsciiKeycodeMap[KeyCode];
+        VgaTextMode::BufferWrite(input);
+        break;
+    }
+    }
 }

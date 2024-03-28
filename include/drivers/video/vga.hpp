@@ -57,6 +57,7 @@ namespace Drivers {
             };
 
             static void PageDown();
+            static void Backspace();
             static void BufferWrite(char* buffer);
             static void BufferWrite(char* buffer, Color FgColor, Color BgColor);
         };

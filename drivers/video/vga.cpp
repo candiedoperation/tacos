@@ -29,10 +29,7 @@ u16 VgaTextMode::CursorPos = 0;
 /// @brief Handles rudimentary non-buffered page down scroll
 void VgaTextMode::PageDown()
 {
-    /*
-        Scroll Up, Copy lines up and make space at bottom.
-    */
-
+    /*Scroll Up, Copy lines up and make space at bottom.*/
     int SecondLineOffset = VGATM_SCR_WIDTH * 2;
     for (int Offset = SecondLineOffset; Offset < VGATM_SCR_PIXELS * 2; Offset++) {
         MemoryAddress[Offset - SecondLineOffset] = MemoryAddress[Offset];
@@ -47,6 +44,13 @@ void VgaTextMode::PageDown()
 
     /* Set Cursor Position to Last Line */
     CursorPos = (VGATM_SCR_WIDTH * (VGATM_SCR_HEIGHT - 1)) * 2;
+}
+
+/// @brief Handles Backspace Requests
+void VgaTextMode::Backspace() {
+    MemoryAddress[CursorPos - 2] = 0; /* Previous TextInfo Cursor */
+    MemoryAddress[CursorPos - 1] = 0; /* Previous TextAttr Cursor */
+    CursorPos -= 2;
 }
 
 void VgaTextMode::BufferWrite(char* buffer)
