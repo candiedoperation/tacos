@@ -46,7 +46,13 @@ void init_acpi()
         case AcpiDef::TWO: {
             VgaTextMode::BufferWrite("ACPI Version 2.0\n");
             AcpiDef::Xsdt* Xsdt = (AcpiDef::Xsdt*)Rsdp->XsdtAddress;
-            AcpiDef::GetTableBySignature(0, Xsdt, 0);
+            
+            AcpiDef::Address FadtAddr;
+            int a = AcpiDef::GetTableBySignature(ACPI_SIG_FADT, Xsdt, &FadtAddr);
+            
+            AcpiDef::Fadt* Fadt = (AcpiDef::Fadt*) FadtAddr;
+            VgaTextMode::BufferWrite(Fadt->Header.Signature);
+
             break;
         }
 

@@ -78,6 +78,13 @@ bool ValidateXsdpChecksum(const AcpiDef::Rsdp* Rsdp)
     return XsdpChecksumValid;
 }
 
+/// @brief 
+/// @param TableHeader 
+/// @return 
+bool ValidateSDTChecksum(const AcpiDef::SdtHeader* TableHeader) {
+    
+}
+
 /// @brief Tries to Find the RSDP Address using the BIOS Search Method
 /// @return RSDP Address Location or 0 (if not found)
 AcpiDef::RSDPAddress GetRSDPAddrBIOS()
@@ -174,12 +181,12 @@ AcpiDef::Status AcpiDef::GetTableBySignature(
     u32 SdtEntries = ((Xsdt->Header.Length - sizeof(Xsdt->Header)) / 8);
     for (u32 Offset = 0; Offset < SdtEntries; Offset++) {
         AcpiDef::SdtHeader* TableHeader = (AcpiDef::SdtHeader*)Xsdt->SdtList[Offset];
-
-        char* a = TableHeader->Signature;
-        VgaTextMode::BufferWrite(a);
-        VgaTextMode::BufferWrite("\n");
+        if (!strncmp(TableHeader->Signature, Signature, 4)) {
+            *Table = Xsdt->SdtList[Offset]; /* Set Ptr to Mem Addr. */
+            return (AcpiDef::Status) 1; /* FIX IN FUTURE. */
+        }
     }
 
-    // Think of returning an address to the table!
+    /* Table Not Found */
     return 0;
 }
