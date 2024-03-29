@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <drivers/acpi/acpidef.hpp>
+#include <drivers/acpi/acpipvdr.hpp>
 #include <drivers/video/vga.hpp>
 #include <tools/replib/replib.hpp>
 
@@ -81,14 +81,15 @@ bool ValidateXsdpChecksum(const AcpiDef::Rsdp* Rsdp)
 /// @brief Validates the Checksum for any ACPI System Descriptor Table
 /// @param TableHeader Pointer to the SDT Header
 /// @return True or False based on validity
-bool ValidateSDTChecksum(const AcpiDef::SdtHeader* TableHeader) {
+bool ValidateSDTChecksum(const AcpiDef::SdtHeader* TableHeader)
+{
     u8 SdtBytesSum = 0;
     for (u32 Offset = 0; Offset < TableHeader->Length; Offset++) {
         /* Add all bytes present in structure */
-        SdtBytesSum += ((u8*) TableHeader)[Offset];
+        SdtBytesSum += ((u8*)TableHeader)[Offset];
     }
 
-    return SdtBytesSum == 0;
+    return (SdtBytesSum == 0);
 }
 
 /// @brief Tries to Find the RSDP Address using the BIOS Search Method
@@ -189,7 +190,7 @@ AcpiDef::Status AcpiDef::GetTableBySignature(
         AcpiDef::SdtHeader* TableHeader = (AcpiDef::SdtHeader*)Xsdt->SdtList[Offset];
         if (!strncmp(TableHeader->Signature, Signature, 4) && ValidateSDTChecksum(TableHeader)) {
             *Table = Xsdt->SdtList[Offset]; /* Set Ptr to Mem Addr. */
-            return (AcpiDef::Status) 1; /* ADD CORRECT CODE IN FUTURE. */
+            return (AcpiDef::Status)1; /* ADD CORRECT CODE IN FUTURE. */
         }
     }
 

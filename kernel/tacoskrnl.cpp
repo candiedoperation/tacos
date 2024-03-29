@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <drivers/acpi/acpidef.hpp>
+#include <drivers/acpi/acpipvdr.hpp>
 #include <drivers/video/vga.hpp>
 #include <kernel/interrupt.hpp>
 
@@ -32,41 +32,6 @@ void clear_screen()
     }
 }
 
-void init_acpi()
-{
-    const AcpiDef::RSDPAddress RsdpAddr = AcpiDef::GetRSDPAddr();
-    if (RsdpAddr != 0) {
-        AcpiDef::Rsdp* Rsdp = (AcpiDef::Rsdp*)RsdpAddr;
-        switch (AcpiDef::GetACPIVersion(Rsdp)) {
-        case AcpiDef::ONE: {
-            VgaTextMode::BufferWrite("ACPI Version 1.0\n");
-            break;
-        }
-
-        case AcpiDef::TWO: {
-            VgaTextMode::BufferWrite("ACPI Version 2.0\n");
-            AcpiDef::Xsdt* Xsdt = (AcpiDef::Xsdt*)Rsdp->XsdtAddress;
-            
-            AcpiDef::Address FadtAddr;
-            int a = AcpiDef::GetTableBySignature(ACPI_SIG_FADT, Xsdt, &FadtAddr);
-            
-            AcpiDef::Fadt* Fadt = (AcpiDef::Fadt*) FadtAddr;
-            VgaTextMode::BufferWrite(Fadt->Header.Signature);
-
-            break;
-        }
-
-        default: {
-            VgaTextMode::BufferWrite("Invalid ACPI Version\n");
-            break;
-        }
-        }
-    } else {
-        VgaTextMode::BufferWrite("ACPI Not Supported");
-        asm volatile("cli; hlt");
-    }
-}
-
 extern "C" void LoadKernel()
 {
     /* Kernel Entrypoint */
@@ -74,11 +39,23 @@ extern "C" void LoadKernel()
 
     VgaTextMode::BufferWrite("tacOS Kernel Initializing...\n", VgaTextMode::Color::YELLOW, VgaTextMode::Color::BLACK);
 
-    init_acpi();
+    /* Initialize ACPI */
+    AcpiDef::Status AcpiInitStatus = AcpiProvider::Initialize();
+    if (!AcpiInitStatus) {
+        VgaTextMode::BufferWrite("ACPI Version Unsupported");
+        __asm__ volatile("cli; hlt");
+    }
+
+    AcpiDef::Address FadtAddr;
+    AcpiDef::GetTableBySignature(ACPI_SIG_FADT, AcpiProvider::Xsdt, &FadtAddr);
+    
+    AcpiDef::Fadt* Fadt = (AcpiDef::Fadt*) FadtAddr;
+    VgaTextMode::BufferWrite(Fadt->Header.Signature);
+
     Interrupt::Register();
 
     /* Check if CPU Exceptions and Interrupts Interrupts Work! */
-    //int DivByZ = 1/0;
+    // int DivByZ = 1/0;
 
     for (;;) {
         /*

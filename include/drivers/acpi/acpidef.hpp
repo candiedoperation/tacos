@@ -36,6 +36,7 @@ using namespace tacos::Kernel;
 namespace tacos {
 namespace Drivers {
     namespace Acpi {
+        /// @brief ACPI Definitions Class
         class AcpiDef {
         public:
             /// @brief XSDP Table Address

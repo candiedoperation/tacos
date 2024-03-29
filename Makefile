@@ -12,6 +12,7 @@ KRNL_DEPENDENCIES = $(BUILD_PATH)/osloader/osloader.o \
 					$(BUILD_PATH)/drivers/hal/virtkbd.o \
 					$(BUILD_PATH)/drivers/ps2/keyboard.o \
 					$(BUILD_PATH)/drivers/acpi/acpidef.o \
+					$(BUILD_PATH)/drivers/acpi/acpipvdr.o \
 					$(BUILD_PATH)/drivers/video/vga.o \
 					$(BUILD_PATH)/kernel/isrdef.o \
 					$(BUILD_PATH)/kernel/interrupt.o \
