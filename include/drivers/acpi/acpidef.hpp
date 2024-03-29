@@ -243,6 +243,27 @@ namespace Drivers {
                 u64 HypervisorVendorId;
             } __attribute__((packed));
 
+            /// @brief Multiple APIC Descriptor Table Structure
+            struct Madt {
+                /*
+                    The Multiple APIC Description Table (MADT) is an ACPI table which
+                    provides informations necessary for operation on systems with APIC.
+                    The last part of the structure is a list of Interrupt Controller
+                    structures. The first byte defines the structure type and the second
+                    byte defines the structure length.
+
+                    Refer:
+                    https://wiki.osdev.org/MADT
+                    https://blog.wesleyac.com/posts/ioapic-interrupts
+                    https://uefi.org/htmlspecs/ACPI_Spec_6_4_html/05_ACPI_Software_Programming_Model/ACPI_Software_Programming_Model.html#multiple-apic-description-table-madt
+                */
+
+                SdtHeader Header;
+                u32 LocalAPICAddr;
+                u32 Flags;
+                u16 InterruptControllers[1];
+            } __attribute__((packed));
+
             static RSDPAddress GetRSDPAddr();
             static Version GetACPIVersion(const Rsdp* XsdpTbl);
             static Status GetTableBySignature(char* Signature, Xsdt* Xsdt, Address* Table);

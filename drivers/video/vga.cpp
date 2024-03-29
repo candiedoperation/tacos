@@ -48,11 +48,6 @@ void VgaTextMode::PageDown()
     CursorPos = (VGATM_SCR_WIDTH * (VGATM_SCR_HEIGHT - 1)) * 2;
 }
 
-/// @brief Handles Backspace Requests
-void VgaTextMode::Backspace()
-{
-}
-
 void VgaTextMode::BufferWrite(char* buffer)
 {
     /* Use Default Colors */

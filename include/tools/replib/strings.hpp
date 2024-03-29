@@ -1,6 +1,6 @@
 /*
     tacOS
-    Copyright (C) 2023  Atheesh Thirumalairajan
+    Copyright (C) 2024  Atheesh Thirumalairajan
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,21 +16,18 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef KERNEL_TYPES_HPP
-#define KERNEL_TYPES_HPP
+#ifndef TOOLS_REPLIB_STRINGS_HPP
+#define TOOLS_REPLIB_STRINGS_HPP
+
+#include <kernel/types.hpp>
+
+using namespace tacos::Kernel;
 
 namespace tacos {
-namespace Kernel {
-    typedef unsigned char u8;
-    typedef unsigned short u16;
-    typedef unsigned int u32;
-    typedef unsigned long long int u64;
-
-    typedef signed char i8;
-    typedef signed short i16;
-    typedef signed int i32;
-
-    typedef u64 usize; /* Use #ifndef in future. */
+namespace Tools {
+    namespace RepLib {
+        i32 strncmp(const char* s1, const char* s2, usize len); 
+    }
 }
 }
 

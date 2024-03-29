@@ -18,24 +18,21 @@
 
 #include <drivers/acpi/acpidef.hpp>
 #include <drivers/video/vga.hpp>
+#include <tools/replib/replib.hpp>
 
 using namespace tacos::Drivers::Acpi;
 using namespace tacos::Drivers::Video;
+using namespace tacos::Tools::RepLib;
 
 /// @brief Checks if current string is RSD PTR
 /// @param Signature Pointer to 8 byte Signature String
 /// @return True or False based on Validity
 bool ValidateXsdpSignature(const char* Signature)
 {
-    bool SigValid = true;
-    for (int i = 0; i < sizeof(Signature); i++) {
-        if (Signature[i] != ACPI_SIG_RSDP[i]) {
-            SigValid = false;
-            break;
-        }
-    }
-
-    return SigValid;
+    return !(strncmp(
+        Signature,
+        ACPI_SIG_RSDP,
+        sizeof(Signature)));
 }
 
 /// @brief Validates the RSDP or XSDP Checksum
@@ -105,7 +102,7 @@ AcpiDef::RSDPAddress GetRSDPAddrBIOS()
         const u8* MemBlock = (u8*)MemLoc;
         const AcpiDef::Rsdp* Rsdp = (AcpiDef::Rsdp*)MemBlock;
         if (ValidateXsdpSignature(Rsdp->Signature) && ValidateXsdpChecksum(Rsdp))
-            return (AcpiDef::RSDPAddress) MemLoc;
+            return (AcpiDef::RSDPAddress)MemLoc;
     }
 
     /* Get Pointer to EBDA and Probe first 1KB */
@@ -165,18 +162,18 @@ AcpiDef::Status AcpiDef::GetTableBySignature(
     AcpiDef::Address* Table)
 {
     /*
-        The XSDT Length parameter indicates the total size of the table, 
+        The XSDT Length parameter indicates the total size of the table,
         inclusive of the header.
 
         Find the number of SdtList entries in the Root SDT by subtracting
-        the total length field of the Root SDT from its header size. The 
+        the total length field of the Root SDT from its header size. The
         resulting value is the number of bytes. XSDT values are 8 bytes
         in length. Divide the resulting value by 8 to get the entries.
     */
 
     u32 SdtEntries = ((Xsdt->Header.Length - sizeof(Xsdt->Header)) / 8);
     for (u32 Offset = 0; Offset < SdtEntries; Offset++) {
-        AcpiDef::SdtHeader* TableHeader = (AcpiDef::SdtHeader*) Xsdt->SdtList[Offset];
+        AcpiDef::SdtHeader* TableHeader = (AcpiDef::SdtHeader*)Xsdt->SdtList[Offset];
 
         char* a = TableHeader->Signature;
         VgaTextMode::BufferWrite(a);

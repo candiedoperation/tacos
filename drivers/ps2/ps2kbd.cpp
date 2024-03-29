@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <drivers/hal/ps2kbd.hpp>
+#include <drivers/ps2/ps2kbd.hpp>
 
 using namespace tacos::Drivers::HAL;
 
