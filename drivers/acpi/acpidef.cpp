@@ -82,7 +82,13 @@ bool ValidateXsdpChecksum(const AcpiDef::Rsdp* Rsdp)
 /// @param TableHeader Pointer to the SDT Header
 /// @return True or False based on validity
 bool ValidateSDTChecksum(const AcpiDef::SdtHeader* TableHeader) {
-    return true;
+    u8 SdtBytesSum = 0;
+    for (u32 Offset = 0; Offset < TableHeader->Length; Offset++) {
+        /* Add all bytes present in structure */
+        SdtBytesSum += ((u8*) TableHeader)[Offset];
+    }
+
+    return SdtBytesSum == 0;
 }
 
 /// @brief Tries to Find the RSDP Address using the BIOS Search Method
