@@ -18,7 +18,7 @@
 
 #include <asm/io.hpp>
 #include <drivers/hal/pic8259.hpp>
-#include <drivers/ps2/ps2kbd.hpp>
+#include <drivers/ps2/keyboard.hpp>
 #include <drivers/video/vga.hpp> // REMOVE IN FUTURE WHEN APIs ARE IMPL.
 
 using namespace tacos::Drivers::Video; // REMOVE IN FUTURE WHEN APIs ARE IMPL.
@@ -159,7 +159,7 @@ void Pic8259::TranslateInterrupt(u8 InterruptCode)
         */
 
         u8 ScanCode = IO::inb(0x60);
-        Ps2Kbd::KeyboardInterrupt(ScanCode);        
+        PS2::Keyboard::KeyboardInterrupt(ScanCode);        
         Pic8259::EndOfInterrupt(InterruptCode);
         break;
     }

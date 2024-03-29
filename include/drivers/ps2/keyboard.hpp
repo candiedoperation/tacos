@@ -26,8 +26,8 @@ using namespace tacos::Kernel;
 
 namespace tacos {
 namespace Drivers {
-    namespace HAL {
-        class Ps2Kbd {
+    namespace PS2 {
+        class Keyboard {
         public:
             static void KeyboardInterrupt(u8 ScanCode);
         };

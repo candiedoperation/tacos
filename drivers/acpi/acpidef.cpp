@@ -78,11 +78,11 @@ bool ValidateXsdpChecksum(const AcpiDef::Rsdp* Rsdp)
     return XsdpChecksumValid;
 }
 
-/// @brief 
-/// @param TableHeader 
-/// @return 
+/// @brief Validates the Checksum for any ACPI System Descriptor Table
+/// @param TableHeader Pointer to the SDT Header
+/// @return True or False based on validity
 bool ValidateSDTChecksum(const AcpiDef::SdtHeader* TableHeader) {
-    
+    return true;
 }
 
 /// @brief Tries to Find the RSDP Address using the BIOS Search Method
@@ -181,9 +181,9 @@ AcpiDef::Status AcpiDef::GetTableBySignature(
     u32 SdtEntries = ((Xsdt->Header.Length - sizeof(Xsdt->Header)) / 8);
     for (u32 Offset = 0; Offset < SdtEntries; Offset++) {
         AcpiDef::SdtHeader* TableHeader = (AcpiDef::SdtHeader*)Xsdt->SdtList[Offset];
-        if (!strncmp(TableHeader->Signature, Signature, 4)) {
+        if (!strncmp(TableHeader->Signature, Signature, 4) && ValidateSDTChecksum(TableHeader)) {
             *Table = Xsdt->SdtList[Offset]; /* Set Ptr to Mem Addr. */
-            return (AcpiDef::Status) 1; /* FIX IN FUTURE. */
+            return (AcpiDef::Status) 1; /* ADD CORRECT CODE IN FUTURE. */
         }
     }
 

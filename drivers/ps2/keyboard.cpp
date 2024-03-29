@@ -16,8 +16,10 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <drivers/ps2/ps2kbd.hpp>
+#include <drivers/ps2/keyboard.hpp>
+#include <drivers/hal/virtkbd.hpp>
 
+using namespace tacos::Drivers::PS2;
 using namespace tacos::Drivers::HAL;
 
 /// @brief PS/2 Keyboard Scan Code Set 01
@@ -377,7 +379,7 @@ static const VirtualKbd::VKey ScanCodeS2[512] = {
 
 /// @brief Handle PS/2 Keyboard Interrupts, Translate to VKey Inputs.
 /// @param ScanCode Scan Code obtained from PS/2 Controller
-void Ps2Kbd::KeyboardInterrupt(u8 ScanCode)
+void Keyboard::KeyboardInterrupt(u8 ScanCode)
 {
     /*
         This routine handles converting PS/2 Keyboard inputs,
