@@ -64,6 +64,10 @@ namespace Drivers {
                 TABLET = 8
             };
 
+            enum MadtEntryType {
+                LOCAL_APIC = 0,
+            };
+
             /// @brief Common Header for all ACPI System Descriptor Tables
             struct SdtHeader {
                 char Signature[4];
@@ -75,6 +79,12 @@ namespace Drivers {
                 u32 OEMRevision;
                 u32 CreatorID;
                 u32 CreatorRevision;
+            } __attribute__((packed));
+
+            /// @brief MADT Variable Length Entry
+            struct MadtEntry {
+                u8 EntryType;
+                u8 RecordLength;
             } __attribute__((packed));
 
             /// @brief Generic Address Strucutre (GAS) Format
@@ -262,7 +272,59 @@ namespace Drivers {
                 SdtHeader Header;
                 u32 LocalAPICAddr;
                 u32 Flags;
-                u16 InterruptControllers[1];
+                MadtEntry InterruptControllers[1];
+            } __attribute__((packed));
+
+            /// @brief Processor Local APIC Entry Type
+            struct MadtEntryLocalApic {
+                u8 AcpiProcessorId;
+                u8 ApicId;
+                u32 Flags;
+            } __attribute__((packed));
+
+            /// @brief I/O APIC Entry Type
+            struct MadtEntryApic {
+                u8 ApicId;
+                u8 Reserved;
+                u32 ApicAddress;
+                u32 GsiBase; /* What's this? */
+            } __attribute__((packed));
+
+            /// @brief I/O APIC Interrupt Source Override Entry
+            struct MadtEntryApicISROverride {
+                u8 BusSource;
+                u8 IrqSource;
+                u32 Gsi;
+                u16 Flags;    
+            } __attribute__((packed));
+
+            /// @brief I/O APIC Non-maskable Interrupt Source Entry
+            struct MadtEntryApicNMISource {
+                u8 NmiSource;
+                u8 Reserved;
+                u16 Flags;
+                u32 Gsi;
+            } __attribute__((packed));
+
+            /// @brief Local APIC Non-maskable Interrupt Entry
+            struct MadtEntryLocalApicNMI {
+                u8 AcpiProcessorId;
+                u16 Flags;
+                u8 LINT;
+            } __attribute__((packed));
+
+            /// @brief Local APIC Address Override Entry
+            struct MadtEntryLocalApicAddrOverride {
+                u16 Reserved;
+                u64 PhysicalAddress;
+            } __attribute__((packed));
+
+            /// @brief Processor Local x2APIC Entry
+            struct MadtEntryLocalX2Apic {
+                u16 Reserved;
+                u32 ApicId;
+                u32 Flags;
+                u32 ApicId;
             } __attribute__((packed));
 
             static RSDPAddress GetRSDPAddr();
