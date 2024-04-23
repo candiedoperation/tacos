@@ -46,12 +46,7 @@ extern "C" void LoadKernel()
         __asm__ volatile("cli; hlt");
     }
 
-    /* FUTURE: This Goes to Interrupt Register for IO/APIC Stuff. */
-    AcpiDef::Address MadtAddr;
-    AcpiDef::GetTableBySignature(ACPI_SIG_MADT, AcpiProvider::Xsdt, &MadtAddr);
-    AcpiDef::Madt* Madt = (AcpiDef::Madt*) MadtAddr;
-    VgaTextMode::BufferWrite(Madt->Header.Signature);
-
+    /* Register for Interrupts */
     Interrupt::Register();
 
     /* Check if CPU Exceptions and Interrupts Interrupts Work! */

@@ -324,7 +324,7 @@ namespace Drivers {
                 u16 Reserved;
                 u32 ApicId;
                 u32 Flags;
-                u32 ApicId;
+                u32 AcpiId;
             } __attribute__((packed));
 
             static RSDPAddress GetRSDPAddr();

@@ -17,9 +17,10 @@
 */
 
 #include <asm/io.hpp>
-#include <drivers/hal/pic8259.hpp>
-#include <drivers/video/vga.hpp>
 #include <kernel/interrupt.hpp>
+#include <drivers/hal/apic.hpp>
+#include <drivers/video/vga.hpp>
+#include <drivers/hal/pic8259.hpp>
 
 using namespace tacos::Kernel;
 using namespace tacos::Drivers::HAL;
@@ -66,7 +67,11 @@ namespace Kernel {
         }
 
         /* Initialize Interrupt Controllers */
-        Pic8259::Initialize();
+        Pic8259::Initialize(); // TODO: DISABLE FOR APIC USE
+
+        /* Intiailize APIC Interrupts */
+        Apic::Status ApicStatus = Apic::Initialize();
+        if (!ApicStatus) VgaTextMode::BufferWrite("APIC Initialization Failed!");
 
         /*
             __asm__ executes traditional assembly block and it does
