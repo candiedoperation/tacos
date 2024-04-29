@@ -19,19 +19,36 @@
 #include <drivers/hal/apic.hpp>
 #include <drivers/acpi/acpipvdr.hpp>
 #include <drivers/video/vga.hpp>
+#include <tools/replib/replib.hpp>
 
 using namespace tacos::Drivers::HAL;
 using namespace tacos::Drivers::Acpi;
+using namespace tacos::Tools::RepLib;
 using namespace tacos::Drivers::Video; // take this off!
 
 
 /// @brief Initializes the Advanced Programmable Interrupt Controller (APIC)
 Apic::Status Apic::Initialize()
 {
-    /* We're assuming ACPI is Initialized by LoadKernel() */
+    /* 
+        To Enable APIC based interrupts by configuring the
+        IOREDTBL entry. This configuration is obtained by
+        parsing the Multiple APIC Descriptor Table (MADT).
+        We're assuming ACPI is Initialized by LoadKernel().
+        
+        Refer:
+        https://blog.wesleyac.com/posts/ioapic-interrupts
+    */
+
     AcpiDef::Address MadtAddr;
     AcpiDef::GetTableBySignature(ACPI_SIG_MADT, AcpiProvider::Xsdt, &MadtAddr);
     AcpiDef::Madt* Madt = (AcpiDef::Madt*) MadtAddr;
-    VgaTextMode::BufferWrite(Madt->Header.Signature);
+    
+    //char* a = " \n";
+    //a[0] = Madt->InterruptControllers[0].RecordLength + 65;
+    //VgaTextMode::BufferWrite(a);
+    printf(254383);
+
+    //VgaTextMode::BufferWrite(Madt->Header.Signature);
     return Status::OK;
 }

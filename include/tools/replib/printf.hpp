@@ -16,11 +16,19 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef TOOLS_REPLIB_HPP
-#define TOOLS_REPLIB_HPP
+#ifndef TOOLS_REPLIB_PRINTF_HPP
+#define TOOLS_REPLIB_PRINTF_HPP
 
-/* Include All Replacement Library Headers */
-#include <tools/replib/printf.hpp>
-#include <tools/replib/strings.hpp>
+#include <kernel/types.hpp>
+
+using namespace tacos::Kernel;
+
+namespace tacos {
+namespace Tools {
+    namespace RepLib {
+        void printf(u64 Num);
+    }
+}
+}
 
 #endif

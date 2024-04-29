@@ -16,11 +16,26 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef TOOLS_REPLIB_HPP
-#define TOOLS_REPLIB_HPP
-
-/* Include All Replacement Library Headers */
+#include <kernel/types.hpp>
+#include <drivers/video/vga.hpp>
 #include <tools/replib/printf.hpp>
-#include <tools/replib/strings.hpp>
 
-#endif
+using namespace tacos::Tools;
+using namespace tacos::Drivers::Video;
+
+/// @brief Draft printf Function (u64 Only)
+/// @param Num u64 Integer
+void RepLib::printf(u64 Num) {
+    char* map = "0123456789";
+    char tmp[21];
+    tmp[20] = '\0';
+    u8 i = 19;
+    
+    while (Num != 0) {
+        tmp[i--] = map[Num % 10];
+        Num /= 10;
+    }
+
+    /* Print The String */
+    VgaTextMode::BufferWrite(tmp + i + 1);
+}
