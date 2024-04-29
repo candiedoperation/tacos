@@ -82,7 +82,7 @@ namespace Drivers {
             } __attribute__((packed));
 
             /// @brief MADT Variable Length Entry
-            struct MadtEntry {
+            struct MadtEntryHeader {
                 u8 EntryType;
                 u8 RecordLength;
             } __attribute__((packed));
@@ -272,11 +272,12 @@ namespace Drivers {
                 SdtHeader Header;
                 u32 LocalAPICAddr;
                 u32 Flags;
-                MadtEntry InterruptControllers[1];
+                u8 InterruptControllersLoc;
             } __attribute__((packed));
 
             /// @brief Processor Local APIC Entry Type
             struct MadtEntryLocalApic {
+                MadtEntryHeader Header;
                 u8 AcpiProcessorId;
                 u8 ApicId;
                 u32 Flags;
@@ -284,6 +285,7 @@ namespace Drivers {
 
             /// @brief I/O APIC Entry Type
             struct MadtEntryApic {
+                MadtEntryHeader Header;
                 u8 ApicId;
                 u8 Reserved;
                 u32 ApicAddress;
@@ -292,6 +294,7 @@ namespace Drivers {
 
             /// @brief I/O APIC Interrupt Source Override Entry
             struct MadtEntryApicISROverride {
+                MadtEntryHeader Header;
                 u8 BusSource;
                 u8 IrqSource;
                 u32 Gsi;
@@ -300,6 +303,7 @@ namespace Drivers {
 
             /// @brief I/O APIC Non-maskable Interrupt Source Entry
             struct MadtEntryApicNMISource {
+                MadtEntryHeader Header;
                 u8 NmiSource;
                 u8 Reserved;
                 u16 Flags;
@@ -308,6 +312,7 @@ namespace Drivers {
 
             /// @brief Local APIC Non-maskable Interrupt Entry
             struct MadtEntryLocalApicNMI {
+                MadtEntryHeader Header;
                 u8 AcpiProcessorId;
                 u16 Flags;
                 u8 LINT;
@@ -315,12 +320,14 @@ namespace Drivers {
 
             /// @brief Local APIC Address Override Entry
             struct MadtEntryLocalApicAddrOverride {
+                MadtEntryHeader Header;
                 u16 Reserved;
                 u64 PhysicalAddress;
             } __attribute__((packed));
 
             /// @brief Processor Local x2APIC Entry
             struct MadtEntryLocalX2Apic {
+                MadtEntryHeader Header;
                 u16 Reserved;
                 u32 ApicId;
                 u32 Flags;

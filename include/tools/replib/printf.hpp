@@ -27,6 +27,7 @@ namespace tacos {
 namespace Tools {
     namespace RepLib {
         void printf(u64 Num);
+        void printf(char* Str);
     }
 }
 }

@@ -43,12 +43,18 @@ Apic::Status Apic::Initialize()
     AcpiDef::Address MadtAddr;
     AcpiDef::GetTableBySignature(ACPI_SIG_MADT, AcpiProvider::Xsdt, &MadtAddr);
     AcpiDef::Madt* Madt = (AcpiDef::Madt*) MadtAddr;
-    
-    //char* a = " \n";
-    //a[0] = Madt->InterruptControllers[0].RecordLength + 65;
-    //VgaTextMode::BufferWrite(a);
-    printf(254383);
+    AcpiDef::MadtEntryHeader* ICPtr = (AcpiDef::MadtEntryHeader*) &Madt->InterruptControllersLoc;
 
-    //VgaTextMode::BufferWrite(Madt->Header.Signature);
+    while (ICPtr->RecordLength != 0) {    
+        printf("MADT Entry: ");
+        printf(ICPtr->EntryType);
+        printf(" -> ");
+        printf(ICPtr->RecordLength);
+        printf("\n");
+
+        /* Increment Pointer */
+        ICPtr += ICPtr->RecordLength;
+    }
+
     return Status::OK;
 }
