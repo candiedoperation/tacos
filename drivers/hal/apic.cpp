@@ -31,7 +31,7 @@ using namespace tacos::Drivers::Video; // take this off!
 Apic::Status Apic::Initialize()
 {
     /* 
-        To Enable APIC based interrupts by configuring the
+        Enable APIC based interrupts by configuring the
         IOREDTBL entry. This configuration is obtained by
         parsing the Multiple APIC Descriptor Table (MADT).
         We're assuming ACPI is Initialized by LoadKernel().
@@ -44,6 +44,18 @@ Apic::Status Apic::Initialize()
     AcpiDef::GetTableBySignature(ACPI_SIG_MADT, AcpiProvider::Xsdt, &MadtAddr);
     AcpiDef::Madt* Madt = (AcpiDef::Madt*) MadtAddr;
     AcpiDef::MadtEntryHeader* ICPtr = (AcpiDef::MadtEntryHeader*) &Madt->InterruptControllersLoc;
+
+    /*
+        The MADT table contains a sequence of variable length 
+        records to enumerate the interrupt devices on the mac
+        -hine. Each record begins consists of a MADT Entry Hea
+        -der. Once the EntryType is parsed from the header, we
+        can perform actions appropriately.
+
+        Refer:
+        https://wiki.osdev.org/MADT
+        https://uefi.org/htmlspecs/ACPI_Spec_6_4_html/05_ACPI_Software_Programming_Model/ACPI_Software_Programming_Model.html#multiple-apic-description-table-madt
+    */
 
     while (ICPtr->RecordLength != 0) {    
         printf("MADT Entry: ");
