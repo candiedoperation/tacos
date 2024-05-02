@@ -79,6 +79,22 @@ Apic::Status Apic::Initialize()
                 break;
             }
 
+            case AcpiDef::MadtEntryType::IO_APIC: {
+                AcpiDef::MadtEntryApic* Apic = (AcpiDef::MadtEntryApic*) Header;
+                printf("IO/APIC Detected (APIC ID): ");
+                printf(Apic->ApicId);
+                printf("\n");
+                break;
+            }
+
+            case AcpiDef::MadtEntryType::IO_APIC_ISR_OVERRIDE: {
+                AcpiDef::MadtEntryApicISROverride* IsrOverride = (AcpiDef::MadtEntryApicISROverride*) Header;
+                printf("IO/APIC ISR Override (IRQ#): ");
+                printf(IsrOverride->IrqSource);
+                printf("\n");
+                break;
+            }
+
             default: {
                 printf("Unknown MADT Entry Type ");
                 printf(Header->EntryType);
