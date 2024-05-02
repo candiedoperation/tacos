@@ -66,6 +66,12 @@ namespace Drivers {
 
             enum MadtEntryType {
                 LOCAL_APIC = 0,
+                IO_APIC = 1,
+                IO_APIC_ISR_OVERRIDE = 2,
+                IO_APIC_NMI_SOURCE = 3,
+                LOCAL_APIC_NMI = 4,
+                LOCAL_APIC_ADDR_OVERRIDE = 5,
+                LOCAL_X2APIC = 9
             };
 
             /// @brief Common Header for all ACPI System Descriptor Tables
@@ -261,7 +267,8 @@ namespace Drivers {
                     provides informations necessary for operation on systems with APIC.
                     The last part of the structure is a list of Interrupt Controller
                     structures. The first byte defines the structure type and the second
-                    byte defines the structure length.
+                    byte defines the structure length. For InterruptControllers[1], We'll 
+                    increment the MADT Pointer by 1 (Modification).
 
                     Refer:
                     https://wiki.osdev.org/MADT
@@ -272,7 +279,6 @@ namespace Drivers {
                 SdtHeader Header;
                 u32 LocalAPICAddr;
                 u32 Flags;
-                u8 InterruptControllersLoc;
             } __attribute__((packed));
 
             /// @brief Processor Local APIC Entry Type

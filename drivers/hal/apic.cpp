@@ -16,37 +16,42 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <drivers/hal/apic.hpp>
 #include <drivers/acpi/acpipvdr.hpp>
-#include <drivers/video/vga.hpp>
+#include <drivers/hal/apic.hpp>
 #include <tools/replib/replib.hpp>
 
 using namespace tacos::Drivers::HAL;
 using namespace tacos::Drivers::Acpi;
 using namespace tacos::Tools::RepLib;
-using namespace tacos::Drivers::Video; // take this off!
 
+static Apic::Status ProcessApicISROverride(AcpiDef::MadtEntryApicISROverride* ApicISROverride)
+{
+}
 
 /// @brief Initializes the Advanced Programmable Interrupt Controller (APIC)
 Apic::Status Apic::Initialize()
 {
-    /* 
+    /*
         Enable APIC based interrupts by configuring the
         IOREDTBL entry. This configuration is obtained by
         parsing the Multiple APIC Descriptor Table (MADT).
         We're assuming ACPI is Initialized by LoadKernel().
-        
+
         Refer:
         https://blog.wesleyac.com/posts/ioapic-interrupts
     */
 
     AcpiDef::Address MadtAddr;
     AcpiDef::GetTableBySignature(ACPI_SIG_MADT, AcpiProvider::Xsdt, &MadtAddr);
-    AcpiDef::Madt* Madt = (AcpiDef::Madt*) MadtAddr;
-    AcpiDef::MadtEntryHeader* ICPtr = (AcpiDef::MadtEntryHeader*) &Madt->InterruptControllersLoc;
+    AcpiDef::Madt* Madt = (AcpiDef::Madt*)MadtAddr;
+
+    /* FUTURE: REPLACE WITH DEBUG STATEMENTS */
+    printf("Local APIC Address: 0d");
+    printf(Madt->LocalAPICAddr);
+    printf("\n");
 
     /*
-        The MADT table contains a sequence of variable length 
+        The MADT table contains a sequence of variable length
         records to enumerate the interrupt devices on the mac
         -hine. Each record begins consists of a MADT Entry Hea
         -der. Once the EntryType is parsed from the header, we
@@ -54,18 +59,33 @@ Apic::Status Apic::Initialize()
 
         Refer:
         https://wiki.osdev.org/MADT
+        https://github.com/pdoane/osdev/blob/master/acpi/acpi.c
         https://uefi.org/htmlspecs/ACPI_Spec_6_4_html/05_ACPI_Software_Programming_Model/ACPI_Software_Programming_Model.html#multiple-apic-description-table-madt
     */
 
-    while (ICPtr->RecordLength != 0) {    
-        printf("MADT Entry: ");
-        printf(ICPtr->EntryType);
-        printf(" -> ");
-        printf(ICPtr->RecordLength);
-        printf("\n");
+    u8* MadtEntryPtr = (u8*) (Madt + 1);
+    u8* MadtEnd = (u8*) Madt + Madt->Header.Length;
 
-        /* Increment Pointer */
-        ICPtr += ICPtr->RecordLength;
+    while (MadtEntryPtr < MadtEnd) {
+        AcpiDef::MadtEntryHeader* Header = (AcpiDef::MadtEntryHeader*) MadtEntryPtr;
+        MadtEntryPtr += Header->RecordLength;
+
+        switch(Header->EntryType) {
+            case AcpiDef::MadtEntryType::LOCAL_APIC: {
+                AcpiDef::MadtEntryLocalApic* LApic = (AcpiDef::MadtEntryLocalApic*) Header;
+                printf("Processor Detected (CPUID): ");
+                printf(LApic->AcpiProcessorId);
+                printf("\n");
+                break;
+            }
+
+            default: {
+                printf("Unknown MADT Entry Type ");
+                printf(Header->EntryType);
+                printf("\n");
+                break;
+            }
+        }
     }
 
     return Status::OK;
