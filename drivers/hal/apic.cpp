@@ -63,6 +63,9 @@ Apic::Status Apic::Initialize()
         https://uefi.org/htmlspecs/ACPI_Spec_6_4_html/05_ACPI_Software_Programming_Model/ACPI_Software_Programming_Model.html#multiple-apic-description-table-madt
     */
 
+    AcpiDef::MadtEntryApic* IoApic;
+    AcpiDef::MadtEntryLocalApic* LApicList[10];
+
     u8* MadtEntryPtr = (u8*) (Madt + 1);
     u8* MadtEnd = (u8*) Madt + Madt->Header.Length;
 
@@ -73,6 +76,8 @@ Apic::Status Apic::Initialize()
         switch(Header->EntryType) {
             case AcpiDef::MadtEntryType::LOCAL_APIC: {
                 AcpiDef::MadtEntryLocalApic* LApic = (AcpiDef::MadtEntryLocalApic*) Header;
+                LApicList[LApic->AcpiProcessorId] = LApic;
+
                 printf("Processor Detected (CPUID): ");
                 printf(LApic->AcpiProcessorId);
                 printf("\n");
@@ -80,9 +85,9 @@ Apic::Status Apic::Initialize()
             }
 
             case AcpiDef::MadtEntryType::IO_APIC: {
-                AcpiDef::MadtEntryApic* Apic = (AcpiDef::MadtEntryApic*) Header;
+                IoApic = (AcpiDef::MadtEntryApic*) Header;
                 printf("IO/APIC Detected (APIC ID): ");
-                printf(Apic->ApicId);
+                printf(IoApic->ApicId);
                 printf("\n");
                 break;
             }
