@@ -109,5 +109,13 @@ Apic::Status Apic::Initialize()
         }
     }
 
+    printf("De-referencing: ");
+    printf(IoApic->ApicAddress);
+    printf("\n");
+
+    /* Write to IOREGSEL */
+    u8* ApicBasePtr = (u8*) IoApic->ApicAddress;
+    *ApicBasePtr = 0;
+
     return Status::OK;
 }

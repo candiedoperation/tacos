@@ -17,7 +17,7 @@
 */
 
 #include <asm/io.hpp>
-#include <kernel/interrupt.hpp>
+#include <kernel/interrupts/intrdef.hpp>
 #include <drivers/hal/apic.hpp>
 #include <drivers/hal/pic8259.hpp>
 #include <tools/replib/replib.hpp>

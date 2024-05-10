@@ -16,11 +16,11 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <tools/replib/replib.hpp>
 #include <drivers/acpi/acpipvdr.hpp>
-#include <drivers/video/vga.hpp>
-#include <kernel/interrupt.hpp>
+#include <kernel/interrupts/intrdef.hpp>
 
-using namespace tacos::Drivers::Video;
+using namespace tacos::Tools::RepLib;
 using namespace tacos::Drivers::Acpi;
 using namespace tacos::Kernel;
 
@@ -37,17 +37,17 @@ extern "C" void LoadKernel()
     /* Kernel Entrypoint */
     clear_screen();
 
-    VgaTextMode::BufferWrite("tacOS Kernel Initializing...\n", VgaTextMode::Color::YELLOW, VgaTextMode::Color::BLACK);
+    printf("tacOS Kernel Initializing...\n");
 
     /* Initialize ACPI */
     AcpiDef::Status AcpiInitStatus = AcpiProvider::Initialize();
     if (!AcpiInitStatus) {
-        VgaTextMode::BufferWrite("ACPI Version Unsupported");
+        printf("ACPI Version Unsupported");
         __asm__ volatile("cli; hlt");
     }
 
     /* Register for Interrupts */
-    Interrupt::Register();
+    Interrupt::Register(); // FUTURE: IMPROVE ROUTINES, NAMING.
 
     /* Check if CPU Exceptions and Interrupts Interrupts Work! */
     // int DivByZ = 1/0;
