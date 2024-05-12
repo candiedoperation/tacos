@@ -15,6 +15,7 @@
 ;   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 global osload
+global mboot_ebx
 extern os64load
 
 section .multiboot
@@ -42,6 +43,8 @@ gdt64:
 section .data
     msg_head db "-------[ osloader.asm ]-------", 0
     msg_error db "CPU Error ", 0
+    mboot_eax dd 0
+    mboot_ebx dd 0
 
 section .bss
 align 4096
@@ -59,6 +62,9 @@ bits 32 ; Set CPU to 32 Bit Protected Mode
 
 ; Entrypoint
 osload:
+    ; Save Multiboot Pointers
+    call mboot_cache
+
     push 0x0f
     push 0x000b8000
     push msg_head
@@ -71,9 +77,9 @@ osload:
     call memory_paging
     call enable_paging
 
+    ; Load GDT, Perform Long Jump
     lgdt [gdt64.pointer]
     jmp gdt64.code:os64load
-
     hlt
 
 ; Error
@@ -87,6 +93,12 @@ error:
     mov dword [0x000b80b4], ebx
     hlt
 
+; Cache Multiboot Struct
+mboot_cache:
+    mov [mboot_eax], eax
+    mov [mboot_ebx], ebx
+    ret
+
 ; CPU Check - Tests for 64-bit Long Mode
 cpu_check:
     call check_mboot
@@ -96,7 +108,7 @@ cpu_check:
     
 ; Multiboot Check
 check_mboot:
-    cmp eax, 0x36d76289
+    cmp dword [mboot_eax], 0x36d76289
     jne error_mboot
     ret
 

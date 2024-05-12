@@ -15,6 +15,7 @@
 ;   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 global os64load
+extern mboot_ebx
 extern LoadKernel
 
 section .text
@@ -30,5 +31,7 @@ os64load:
     mov fs, ax
     mov gs, ax
 
+    ; Load Kernel with Multiboot Info
+    mov rdi, [mboot_ebx]
     call LoadKernel
     hlt

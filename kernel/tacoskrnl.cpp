@@ -33,12 +33,34 @@ void clear_screen()
     }
 }
 
-extern "C" void LoadKernel()
+struct MultibootTag {
+    u32 TagType;
+    u32 Size;
+};
+
+struct MultibootInfo {
+    u32 Length;
+    u32 Reserved;
+    MultibootTag Tags[0];
+};
+
+extern "C" void LoadKernel(u64 MultibootInfoAddr)
 {
     /* Kernel Entrypoint */
     clear_screen();
 
     printf("tacOS Kernel Initializing...\n");
+
+    u32 i = 0;
+    MultibootInfo* MultibootInfoPtr = (MultibootInfo*)MultibootInfoAddr;
+
+    for (MultibootTag* tag = MultibootInfoPtr->Tags; tag->TagType != 0; tag = (MultibootTag*)((u8*)tag + ((tag->Size + 7) & ~7))) {
+        printf("MBoot Tag Type ");
+        printf(tag->TagType);
+        printf(" -> Size: ");
+        printf(tag->Size);
+        printf("\n");
+    }
 
     /* Register for Interrupts */
     Interrupt::Register(); // FUTURE: IMPROVE ROUTINES, NAMING.
@@ -55,7 +77,7 @@ extern "C" void LoadKernel()
     Interrupt::InitHWInterrupts();
 
     /* Check if CPU Exceptions and Interrupts Interrupts Work! */
-    //int DivByZ = 1/0;
+    // int DivByZ = 1/0;
 
     for (;;) {
         /*
