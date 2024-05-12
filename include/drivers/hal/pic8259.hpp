@@ -20,7 +20,7 @@
 #define DRIVERS_HAL_PIC8259_HPP
 
 #include <kernel/types.hpp>
-using namespace tacos::Kernel;
+using namespace tacOS::Kernel;
 
 #define PIC8259_INIT 0x11 /* PIC Initialization Instruction */
 #define PIC8259_EOI 0x20 /* End of Interrupt Acknowledgement */
@@ -49,7 +49,7 @@ using namespace tacos::Kernel;
 #define PIC8259_MIN_IRQ PIC8259_MASTER_OFFSET
 #define PIC8259_MAX_IRQ (PIC8259_SLAVE_OFFSET + 8)
 
-namespace tacos {
+namespace tacOS {
 namespace Drivers {
     namespace HAL {
         class Pic8259 {

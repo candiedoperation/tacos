@@ -19,7 +19,7 @@
 #include <kernel/types.hpp>
 #include <tools/replib/strings.hpp>
 
-using namespace tacos::Tools;
+using namespace tacOS::Tools;
 
 /// @brief Standard Library Replacement for strncmp
 i32 RepLib::strncmp(const char* s1, const char* s2, usize len)

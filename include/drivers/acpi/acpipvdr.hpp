@@ -22,9 +22,9 @@
 #include <drivers/acpi/acpidef.hpp>
 #include <kernel/types.hpp>
 
-using namespace tacos::Kernel;
+using namespace tacOS::Kernel;
 
-namespace tacos {
+namespace tacOS {
 namespace Drivers {
     namespace Acpi {
         class AcpiProvider {

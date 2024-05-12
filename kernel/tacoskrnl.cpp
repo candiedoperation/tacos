@@ -16,13 +16,14 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <tools/replib/replib.hpp>
 #include <drivers/acpi/acpipvdr.hpp>
 #include <kernel/interrupts/intrdef.hpp>
+#include <kernel/virtmem/pagemap.hpp>
+#include <tools/replib/replib.hpp>
 
-using namespace tacos::Tools::RepLib;
-using namespace tacos::Drivers::Acpi;
-using namespace tacos::Kernel;
+using namespace tacOS::Tools::RepLib;
+using namespace tacOS::Drivers::Acpi;
+using namespace tacOS::Kernel;
 
 void clear_screen()
 {
@@ -39,6 +40,10 @@ extern "C" void LoadKernel()
 
     printf("tacOS Kernel Initializing...\n");
 
+    /* Register for Interrupts */
+    Interrupt::Register(); // FUTURE: IMPROVE ROUTINES, NAMING.
+    VirtMem::PageMap::Intialize();
+
     /* Initialize ACPI */
     AcpiDef::Status AcpiInitStatus = AcpiProvider::Initialize();
     if (!AcpiInitStatus) {
@@ -46,11 +51,11 @@ extern "C" void LoadKernel()
         __asm__ volatile("cli; hlt");
     }
 
-    /* Register for Interrupts */
-    Interrupt::Register(); // FUTURE: IMPROVE ROUTINES, NAMING.
+    /* Enable HW Interrupts */
+    Interrupt::InitHWInterrupts();
 
     /* Check if CPU Exceptions and Interrupts Interrupts Work! */
-    // int DivByZ = 1/0;
+    //int DivByZ = 1/0;
 
     for (;;) {
         /*

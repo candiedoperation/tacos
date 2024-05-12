@@ -16,3 +16,18 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <kernel/types.hpp>
+
+using namespace tacOS::Kernel;
+
+namespace tacOS {
+namespace Kernel {
+    namespace VirtMem {
+        /// @brief Defines Routines and Structures for Memory Paging
+        class PageMap {
+        public:
+            static void Intialize();
+        };
+    }
+}
+}

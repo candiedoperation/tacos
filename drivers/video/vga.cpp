@@ -20,9 +20,9 @@
 #include <kernel/types.hpp>
 #include <asm/io.hpp>
 
-using namespace tacos::Drivers::Video;
-using namespace tacos::Kernel;
-using namespace tacos::ASM;
+using namespace tacOS::Drivers::Video;
+using namespace tacOS::Kernel;
+using namespace tacOS::ASM;
 
 /* Initialize the Static VGA Buffer Addresses */
 u8* VgaTextMode::MemoryAddress = (u8*)VGATM_MEM_ADDRESS;

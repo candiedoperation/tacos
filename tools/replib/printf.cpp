@@ -20,8 +20,8 @@
 #include <drivers/video/vga.hpp>
 #include <tools/replib/printf.hpp>
 
-using namespace tacos::Tools;
-using namespace tacos::Drivers::Video;
+using namespace tacOS::Tools;
+using namespace tacOS::Drivers::Video;
 
 /// @brief Draft printf Function (u64 Only)
 /// @param Num u64 Integer

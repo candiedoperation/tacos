@@ -20,9 +20,9 @@
 #include <drivers/video/vga.hpp>
 #include <tools/replib/replib.hpp>
 
-using namespace tacos::Drivers::Acpi;
-using namespace tacos::Drivers::Video;
-using namespace tacos::Tools::RepLib;
+using namespace tacOS::Drivers::Acpi;
+using namespace tacOS::Drivers::Video;
+using namespace tacOS::Tools::RepLib;
 
 /// @brief Checks if current string is RSD PTR
 /// @param Signature Pointer to 8 byte Signature String

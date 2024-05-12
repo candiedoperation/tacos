@@ -21,11 +21,11 @@
 
 #include <kernel/types.hpp>
 
-using namespace tacos::Kernel;
+using namespace tacOS::Kernel;
 
 #define INTERRUPT_ISRCOUNT 50 /* Should match with isrdef.asm */
 
-namespace tacos {
+namespace tacOS {
 namespace Kernel {
     class Interrupt {
     public:
@@ -73,6 +73,7 @@ namespace Kernel {
         } __attribute__((packed));
 
         static void Register();
+        static void InitHWInterrupts();
         static void UnhandledException(int Code);
 
         /* Define Standard Kernel Interrupts */

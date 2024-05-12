@@ -21,11 +21,11 @@
 
 #include <kernel/types.hpp>
 
-using namespace tacos::Kernel;
+using namespace tacOS::Kernel;
 
 #define VIRTKBD_MAX_VKEY 256
 
-namespace tacos {
+namespace tacOS {
 namespace Drivers {
     namespace HAL {
         class VirtualKbd {

@@ -21,9 +21,9 @@
 #include <drivers/ps2/keyboard.hpp>
 #include <drivers/video/vga.hpp> // REMOVE IN FUTURE WHEN APIs ARE IMPL.
 
-using namespace tacos::Drivers::Video; // REMOVE IN FUTURE WHEN APIs ARE IMPL.
-using namespace tacos::Drivers::HAL;
-using namespace tacos::ASM;
+using namespace tacOS::Drivers::Video; // REMOVE IN FUTURE WHEN APIs ARE IMPL.
+using namespace tacOS::Drivers::HAL;
+using namespace tacOS::ASM;
 
 /// @brief Intializes the 8259 Programmable Interrupt Contoller
 void Pic8259::Initialize()

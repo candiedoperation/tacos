@@ -18,7 +18,7 @@
 
 #include <drivers/acpi/acpipvdr.hpp>
 
-using namespace tacos::Drivers::Acpi;
+using namespace tacOS::Drivers::Acpi;
 
 AcpiDef::RSDPAddress AcpiProvider::RsdpAddr;
 AcpiDef::Rsdp* AcpiProvider::Rsdp;

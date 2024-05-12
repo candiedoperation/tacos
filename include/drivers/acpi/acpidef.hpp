@@ -21,7 +21,7 @@
 
 #include <kernel/types.hpp>
 
-using namespace tacos::Kernel;
+using namespace tacOS::Kernel;
 
 #define ACPI_EBDA_SEG 0x40E
 #define ACPI_BIOS_MEM_STA 0x000E0000
@@ -33,7 +33,7 @@ using namespace tacos::Kernel;
 #define ACPI_SIG_FADT "FACP"
 #define ACPI_SIG_MADT "APIC"
 
-namespace tacos {
+namespace tacOS {
 namespace Drivers {
     namespace Acpi {
         /// @brief ACPI Definitions Class

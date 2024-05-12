@@ -21,14 +21,14 @@
 
 #include <kernel/types.hpp>
 
-using namespace tacos::Kernel;
+using namespace tacOS::Kernel;
 
 #define VGATM_MEM_ADDRESS 0xB8000
 #define VGATM_SCR_WIDTH 80
 #define VGATM_SCR_HEIGHT 25
 #define VGATM_SCR_PIXELS 2000 /* Pixels = Width * Height = 2000 */
 
-namespace tacos {
+namespace tacOS {
 namespace Drivers {
     namespace Video {
         class VgaTextMode {

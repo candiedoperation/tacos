@@ -20,9 +20,9 @@
 #include <drivers/hal/apic.hpp>
 #include <tools/replib/replib.hpp>
 
-using namespace tacos::Drivers::HAL;
-using namespace tacos::Drivers::Acpi;
-using namespace tacos::Tools::RepLib;
+using namespace tacOS::Drivers::HAL;
+using namespace tacOS::Drivers::Acpi;
+using namespace tacOS::Tools::RepLib;
 
 static Apic::Status ProcessApicISROverride(AcpiDef::MadtEntryApicISROverride* ApicISROverride)
 {

@@ -19,8 +19,8 @@
 #include <drivers/ps2/keyboard.hpp>
 #include <drivers/hal/virtkbd.hpp>
 
-using namespace tacos::Drivers::PS2;
-using namespace tacos::Drivers::HAL;
+using namespace tacOS::Drivers::PS2;
+using namespace tacOS::Drivers::HAL;
 
 /// @brief PS/2 Keyboard Scan Code Set 01
 static const VirtualKbd::VKey ScanCodeS1[512] = {

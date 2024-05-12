@@ -21,9 +21,9 @@
 
 #include <kernel/types.hpp>
 
-using namespace tacos::Kernel;
+using namespace tacOS::Kernel;
 
-namespace tacos {
+namespace tacOS {
 namespace ASM {
     /// @brief Contains x86 Assembly Helpers Interrupt Operations
     class IO {
@@ -72,6 +72,6 @@ namespace ASM {
         }
     };
 }
-} // namespace tacos
+} // namespace tacOS
 
 #endif

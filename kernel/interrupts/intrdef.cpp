@@ -22,12 +22,12 @@
 #include <drivers/hal/pic8259.hpp>
 #include <tools/replib/replib.hpp>
 
-using namespace tacos::Kernel;
-using namespace tacos::Drivers::HAL;
-using namespace tacos::ASM;
-using namespace tacos::Tools::RepLib;
+using namespace tacOS::Kernel;
+using namespace tacOS::Drivers::HAL;
+using namespace tacOS::ASM;
+using namespace tacOS::Tools::RepLib;
 
-namespace tacos {
+namespace tacOS {
 namespace Kernel {
     extern "C" void* IsrWrapperTable[];
     extern "C" void InterruptHandler(u64 InterruptCode)
@@ -77,16 +77,21 @@ namespace Kernel {
             https://wiki.osdev.org/Inline_Assembly/Examples
         */
 
+        /* Load the Interrupt Descriptor Table */
         __asm__ volatile("lidt %0" : : "m"(Idtr));
-        __asm__ volatile("sti");
+    }
 
+    void Interrupt::InitHWInterrupts() {
         /* Initialize Interrupt Controllers */
         Pic8259::Initialize();
         //Pic8259::Disable(); // TODO: ADD APIC COMPATIBILITY CHECK BEFORE DISABLE!
 
         /* Intiailize APIC Interrupts */
-        Apic::Status ApicStatus = Apic::Initialize();
-        if (!ApicStatus) printf("APIC Initialization Failed!");
+        //Apic::Status ApicStatus = Apic::Initialize();
+        //if (!ApicStatus) printf("APIC Initialization Failed!");
+
+        /* Enable HW Interrupts */
+        __asm__ volatile("sti");
     }
 
     void Interrupt::UnhandledException(int Code)

@@ -16,3 +16,23 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <kernel/virtmem/pagemap.hpp>
+
+using namespace tacOS::Kernel::VirtMem;
+
+/// @brief Setup Structures, Configure Memory Paging
+void PageMap::Intialize() {
+    /*
+        Paging in long mode consists of four maps - page directory pointer table, 
+        page directory, page table, and the level-4 page map table (PML4). The
+        structures are populated such that there exists a virtual address that
+        could be mapped to a physical address. This routine currently performs
+        identity paging.
+
+        Refer:
+        https://wiki.osdev.org/Paging
+        https://wiki.osdev.org/Page_Tables
+        https://os.phil-opp.com/page-tables/
+        https://wiki.osdev.org/Setting_Up_Paging
+    */
+}

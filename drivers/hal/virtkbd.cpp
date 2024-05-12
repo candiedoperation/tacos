@@ -19,8 +19,8 @@
 #include <drivers/hal/virtkbd.hpp>
 #include <drivers/video/vga.hpp>
 
-using namespace tacos::Drivers::HAL;
-using namespace tacos::Drivers::Video;
+using namespace tacOS::Drivers::HAL;
+using namespace tacOS::Drivers::Video;
 
 /* Initialize Static Variables */
 bool VirtualKbd::CapsLockOn = false;
