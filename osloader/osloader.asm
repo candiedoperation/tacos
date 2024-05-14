@@ -25,6 +25,15 @@ mboot_start:
     dd mboot_end - mboot_start ; Header Length
     dd 0x100000000 - (0xe85250d6 + 0 + (mboot_end - mboot_start)) ; Checksum
 
+    ; Multiboot Struture to Enable Linear Framebuffers
+    ;dw 5
+    ;dw 0
+    ;dd 20
+    ;dd 0
+    ;dd 0
+    ;dd 0
+    ;align 8
+
     ; Required End Flags
     dw 0 ; Type
     dw 0 ; Flags

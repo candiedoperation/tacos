@@ -46,8 +46,8 @@ Apic::Status Apic::Initialize()
     AcpiDef::Madt* Madt = (AcpiDef::Madt*)MadtAddr;
 
     /* FUTURE: REPLACE WITH DEBUG STATEMENTS */
-    printf("Local APIC Address: 0d");
-    printf(Madt->LocalAPICAddr);
+    printf("\nLocal APIC Address: 0x");
+    printf(Madt->LocalAPICAddr, 16);
     printf("\n");
 
     /*
@@ -109,8 +109,8 @@ Apic::Status Apic::Initialize()
         }
     }
 
-    printf("De-referencing: ");
-    printf(IoApic->ApicAddress);
+    printf("De-referencing: 0x");
+    printf(IoApic->ApicAddress, 16);
     printf("\n");
 
     /* Write to IOREGSEL */

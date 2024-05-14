@@ -16,6 +16,9 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#ifndef KERNEL_VIRTMEM_PAGEMAP_HPP
+#define KERNEL_VIRTMEM_PAGEMAP_HPP
+
 #include <kernel/types.hpp>
 
 using namespace tacOS::Kernel;
@@ -31,3 +34,5 @@ namespace Kernel {
     }
 }
 }
+
+#endif

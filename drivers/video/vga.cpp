@@ -31,7 +31,7 @@ u16 VgaTextMode::CursorPos = 0;
 /// @brief Handles rudimentary non-buffered page down scroll
 void VgaTextMode::PageDown()
 {
-    /*Scroll Up, Copy lines up and make space at bottom.*/
+    /* Scroll Up, Copy lines up and make space at bottom. */
     int SecondLineOffset = VGATM_SCR_WIDTH * 2;
     for (int Offset = SecondLineOffset; Offset < VGATM_SCR_PIXELS * 2; Offset++) {
         MemoryAddress[Offset - SecondLineOffset] = MemoryAddress[Offset];

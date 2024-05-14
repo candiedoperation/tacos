@@ -16,10 +16,11 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <drivers/acpi/acpipvdr.hpp>
-#include <kernel/interrupts/intrdef.hpp>
-#include <kernel/virtmem/pagemap.hpp>
+#include <kernel/mem/pagemap.hpp>
 #include <tools/replib/replib.hpp>
+#include <drivers/acpi/acpipvdr.hpp>
+#include <kernel/multiboot/mbpvdr.hpp>
+#include <kernel/interrupts/intrdef.hpp>
 
 using namespace tacOS::Tools::RepLib;
 using namespace tacOS::Drivers::Acpi;
@@ -33,40 +34,22 @@ void clear_screen()
     }
 }
 
-struct MultibootTag {
-    u32 TagType;
-    u32 Size;
-};
-
-struct MultibootInfo {
-    u32 Length;
-    u32 Reserved;
-    MultibootTag Tags[0];
-};
-
 extern "C" void LoadKernel(u64 MultibootInfoAddr)
 {
-    /* Kernel Entrypoint */
+    /* FUTURE: Take this off */
     clear_screen();
 
-    printf("tacOS Kernel Initializing...\n");
+    /* Perform Early Initialization */
+    Interrupt::Register();                         // FUTURE: IMPROVE ROUTINES, NAMING.
+    MBootProvider::Initialize(MultibootInfoAddr);  // FUTURE: Returns Status, Use it
 
-    u32 i = 0;
-    MultibootInfo* MultibootInfoPtr = (MultibootInfo*)MultibootInfoAddr;
-
-    for (MultibootTag* tag = MultibootInfoPtr->Tags; tag->TagType != 0; tag = (MultibootTag*)((u8*)tag + ((tag->Size + 7) & ~7))) {
-        printf("MBoot Tag Type ");
-        printf(tag->TagType);
-        printf(" -> Size: ");
-        printf(tag->Size);
-        printf("\n");
-    }
-
-    /* Register for Interrupts */
-    Interrupt::Register(); // FUTURE: IMPROVE ROUTINES, NAMING.
+    /* FUTURE: Setup Linear Framebuffer Display */
+    printf("\ntacOS Kernel Initializing...\n");
+    
+    /* Setup Memory */
     VirtMem::PageMap::Intialize();
 
-    /* Initialize ACPI */
+    /* Setup ACPI */
     AcpiDef::Status AcpiInitStatus = AcpiProvider::Initialize();
     if (!AcpiInitStatus) {
         printf("ACPI Version Unsupported");

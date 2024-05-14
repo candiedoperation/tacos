@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <kernel/virtmem/pagemap.hpp>
+#include <kernel/mem/pagemap.hpp>
 
 using namespace tacOS::Kernel::VirtMem;
 

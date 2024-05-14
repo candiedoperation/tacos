@@ -25,15 +25,15 @@ using namespace tacOS::Drivers::Video;
 
 /// @brief Draft printf Function (u64 Only)
 /// @param Num u64 Integer
-void RepLib::printf(u64 Num) {
-    char* map = "0123456789";
+void RepLib::printf(u64 Num, int Base) {
+    char* map = "0123456789ABCDEF";
     char tmp[21];
     tmp[20] = '\0';
     u8 i = sizeof(tmp);
 
     do {
-        tmp[--i] = map[Num % 10];
-        Num /= 10;
+        tmp[--i] = map[Num % Base];
+        Num /= Base;
     } while (Num != 0);
 
     /* Print The String */

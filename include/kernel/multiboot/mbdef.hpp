@@ -16,19 +16,29 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef TOOLS_REPLIB_PRINTF_HPP
-#define TOOLS_REPLIB_PRINTF_HPP
+#ifndef KERNEL_MBOOTDEF_HPP
+#define KERNEL_MBOOTDEF_HPP
 
 #include <kernel/types.hpp>
 
 using namespace tacOS::Kernel;
 
 namespace tacOS {
-namespace Tools {
-    namespace RepLib {
-        void printf(u64 Num, int Base = 10);
-        void printf(char* Str);
-    }
+namespace Kernel {
+    /// @brief Contains Structure Defenitions for Multiboot 2
+    class MBootDef {
+    public:
+        struct MultibootTag {
+            u32 TagType;
+            u32 Size;
+        };
+
+        struct MultibootInfo {
+            u32 Length;
+            u32 Reserved;
+            MultibootTag Tags[0];
+        };
+    };
 }
 }
 
