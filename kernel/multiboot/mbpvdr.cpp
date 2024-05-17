@@ -41,15 +41,32 @@ int MBootProvider::Initialize(u64 MultibootInfoPtrAddress)
 
     MBootInfoPtr = (MBootDef::MultibootInfo*)MultibootInfoPtrAddress;
     for (
-        MBootDef::MultibootTag* Tag = MBootInfoPtr->Tags;
+        MBootDef::TagHeader* Tag = MBootInfoPtr->Tags;
         Tag->TagType != 0;
-        Tag = (MBootDef::MultibootTag*)((u8*)Tag + ((Tag->Size + 7) & ~7))
-    ) {
-        printf("MBoot Tag Type ");
-        printf(Tag->TagType);
-        printf(" -> Size: ");
-        printf(Tag->Size);
-        printf("\n");
+        Tag = (MBootDef::TagHeader*)((u8*)Tag + ((Tag->Size + 7) & ~7))) {
+
+        switch (Tag->TagType) {
+        case MBootDef::Tag::MEMORY_INFO: {
+            MBootDef::MemoryInfo* MemoryInfo = (MBootDef::MemoryInfo*)MBootInfoPtr;
+            printf("\nMemory Info: ");
+            printf("\n    Lower Memory: ");
+            printf(MemoryInfo->MemLower, 16);
+            printf("KB");
+            printf("\n    Upper Memory: ");
+            printf(MemoryInfo->MemUpper);
+            printf("KB\n\n");
+            break;
+        }
+
+        default: {
+            // printf("MBoot Tag Type ");
+            // printf(Tag->TagType);
+            // printf(" -> Size: ");
+            // printf(Tag->Size);
+            // printf("\n");
+            break;
+        }
+        }
     }
 
     /* FUTURE: Return Intialization Status */

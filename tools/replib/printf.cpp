@@ -32,7 +32,7 @@ void RepLib::printf(u64 Num, int Base) {
     u8 i = sizeof(tmp);
 
     do {
-        tmp[--i] = map[Num % Base];
+        tmp[--i] = map[Num % Base]; /* FUTURE: Invalid Base will cause UNINTENDED MEM ACCESS! */
         Num /= Base;
     } while (Num != 0);
 

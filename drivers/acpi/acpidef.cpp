@@ -135,7 +135,7 @@ AcpiDef::RSDPAddress GetRSDPAddrUEFI()
 /// @return Pointer to RSD or 0 (if not found)
 AcpiDef::RSDPAddress AcpiDef::GetRSDPAddr()
 {
-    /* FIX LATER: USE UEFI GET FUNC IF IN UEFI */
+    /* FIX LATER: USE MULTIBOOT!!! */
     return GetRSDPAddrBIOS();
 }
 
