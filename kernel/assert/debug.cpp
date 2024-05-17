@@ -16,25 +16,3 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef KERNEL_MBOOTPVDR_HPP
-#define KERNEL_MBOOTPVDR_HPP
-
-#include <kernel/multiboot/mbdef.hpp>
-#include <kernel/types.hpp>
-
-using namespace tacOS::Kernel;
-
-namespace tacOS {
-namespace Kernel {
-    /// @brief Multiboot 2 Support Routines
-    class MBootProvider {
-    public:
-        static MBootDef::MultibootInfo* MBootInfoPtr;
-        static int Initialize(u64 MultibootInfoPtrAddress);
-        static void ProcessMemoryInfo(MBootDef::MemoryInfo* MemoryInfo);
-        static void ProcessMemoryMap(MBootDef::MemoryMap* MemoryMap);
-    };
-}
-}
-
-#endif

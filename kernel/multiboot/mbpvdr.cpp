@@ -39,22 +39,22 @@ int MBootProvider::Initialize(u64 MultibootInfoPtrAddress)
         https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html
     */
 
+    printf("Reading Multiboot Configuration...\n");
     MBootInfoPtr = (MBootDef::MultibootInfo*)MultibootInfoPtrAddress;
-    for (
-        MBootDef::TagHeader* Tag = MBootInfoPtr->Tags;
-        Tag->TagType != 0;
-        Tag = (MBootDef::TagHeader*)((u8*)Tag + ((Tag->Size + 7) & ~7))) {
 
-        switch (Tag->TagType) {
+    for (
+        MBootDef::TagHeader* MBootInfoTag = MBootInfoPtr->Tags;
+        MBootInfoTag->TagType != 0;
+        MBootInfoTag = (MBootDef::TagHeader*)((u8*)MBootInfoTag + ((MBootInfoTag->Size + 7) & ~7))) {
+
+        switch (MBootInfoTag->TagType) {
         case MBootDef::Tag::MEMORY_INFO: {
-            MBootDef::MemoryInfo* MemoryInfo = (MBootDef::MemoryInfo*)MBootInfoPtr;
-            printf("\nMemory Info: ");
-            printf("\n    Lower Memory: ");
-            printf(MemoryInfo->MemLower, 16);
-            printf("KB");
-            printf("\n    Upper Memory: ");
-            printf(MemoryInfo->MemUpper);
-            printf("KB\n\n");
+            ProcessMemoryInfo((MBootDef::MemoryInfo*)MBootInfoTag);
+            break;
+        }
+
+        case MBootDef::Tag::MEMORY_MAP: {
+            ProcessMemoryMap((MBootDef::MemoryMap*)MBootInfoTag);
             break;
         }
 
@@ -71,4 +71,42 @@ int MBootProvider::Initialize(u64 MultibootInfoPtrAddress)
 
     /* FUTURE: Return Intialization Status */
     return 1;
+}
+
+/// @brief Processed obtained Memory Info Entry
+/// @param MemoryInfo Pointer to Multiboot2 Memory Info Entry
+void MBootProvider::ProcessMemoryInfo(MBootDef::MemoryInfo* MemoryInfo)
+{
+    printf("\nMemory Info (Legacy): ");
+    printf("\n    Lower Memory: ");
+    printf(MemoryInfo->MemLower);
+    printf("KB");
+    printf("\n    Upper Memory: ");
+    printf(MemoryInfo->MemUpper);
+    printf("KB\n\n");
+}
+
+/// @brief Processed obtained Memory Map Entry
+/// @param MemoryMap Pointer to Multiboot2 Memory Map Entry
+void MBootProvider::ProcessMemoryMap(MBootDef::MemoryMap* MemoryMap)
+{
+    /* FUTURE: USE DEBUG STATEMENTS? */
+    printf("\nBIOS Memory Map: ");
+
+    for (
+        MBootDef::MemoryMapEntry* MMapEntry = (MBootDef::MemoryMapEntry*)(MemoryMap + 1);
+        ((u8*)MMapEntry) - ((u8*)(MemoryMap + 1)) < (MemoryMap->Header.Size - sizeof(MBootDef::MemoryMap));
+        MMapEntry = (MBootDef::MemoryMapEntry*)((u8*)MMapEntry + MemoryMap->EntrySize)) {
+
+        printf("\n    Region Start: 0x");
+        printf(MMapEntry->BaseAddress, 16);
+        printf(", Length: ");
+        printf(MMapEntry->Length / 1024);
+        printf("KB, Type: ");
+        printf(MMapEntry->Type);
+        printf(MMapEntry->Reserved == true ? (char* ) " (Reserved)" : (char *) " (Available)");
+    }
+
+    /* Looks Nice? ;-) */
+    printf("\n");
 }
