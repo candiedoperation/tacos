@@ -17,10 +17,10 @@
 */
 
 #include <kernel/mem/physicalmm.hpp>
-#include <tools/replib/replib.hpp>
+#include <tools/kernelrtl/kernelrtl.hpp>
 
 using namespace tacOS::Kernel;
-using namespace tacOS::Tools::RepLib;
+using namespace tacOS::Tools::KernelRTL;
 
 /// @brief Kernel End Linker Label
 extern void* KRNL_END;

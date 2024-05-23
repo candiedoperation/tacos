@@ -20,12 +20,12 @@
 #include <kernel/interrupts/intrdef.hpp>
 #include <drivers/hal/apic.hpp>
 #include <drivers/hal/pic8259.hpp>
-#include <tools/replib/replib.hpp>
+#include <tools/kernelrtl/kernelrtl.hpp>
 
 using namespace tacOS::Kernel;
 using namespace tacOS::Drivers::HAL;
 using namespace tacOS::ASM;
-using namespace tacOS::Tools::RepLib;
+using namespace tacOS::Tools::KernelRTL;
 
 namespace tacOS {
 namespace Kernel {

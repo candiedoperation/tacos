@@ -18,11 +18,11 @@
 
 #include <drivers/acpi/acpipvdr.hpp>
 #include <drivers/hal/apic.hpp>
-#include <tools/replib/replib.hpp>
+#include <tools/kernelrtl/kernelrtl.hpp>
 
 using namespace tacOS::Drivers::HAL;
 using namespace tacOS::Drivers::Acpi;
-using namespace tacOS::Tools::RepLib;
+using namespace tacOS::Tools::KernelRTL;
 
 static Apic::Status ProcessApicISROverride(AcpiDef::MadtEntryApicISROverride* ApicISROverride)
 {

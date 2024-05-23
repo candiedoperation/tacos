@@ -17,9 +17,9 @@
 */
 
 #include <kernel/multiboot/mbpvdr.hpp>
-#include <tools/replib/replib.hpp>
+#include <tools/kernelrtl/kernelrtl.hpp>
 
-using namespace tacOS::Tools::RepLib;
+using namespace tacOS::Tools::KernelRTL;
 
 /* Define Statics */
 MBootDef::MultibootInfo* MBootProvider::MBootInfoPtr;

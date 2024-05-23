@@ -16,17 +16,20 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#ifndef TOOLS_REPLIB_PRINTF_HPP
+#define TOOLS_REPLIB_PRINTF_HPP
+
 #include <kernel/types.hpp>
-#include <tools/replib/strings.hpp>
 
-using namespace tacOS::Tools;
+using namespace tacOS::Kernel;
 
-/// @brief Standard Library Replacement for strncmp
-i32 RepLib::strncmp(const char* s1, const char* s2, usize len)
-{
-    u8 cmp;
-    i32 diff = 0;
-
-    while (len-- && !(diff = *s1++ - (cmp = *s2++)) && cmp);
-    return diff;
+namespace tacOS {
+namespace Tools {
+    namespace KernelRTL {
+        void printf(u64 Num, int Base = 10);
+        void printf(char* Str);
+    }
 }
+}
+
+#endif

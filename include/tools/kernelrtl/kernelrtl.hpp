@@ -20,7 +20,7 @@
 #define TOOLS_REPLIB_HPP
 
 /* Include All Replacement Library Headers */
-#include <tools/replib/printf.hpp>
-#include <tools/replib/strings.hpp>
+#include <tools/kernelrtl/printf.hpp>
+#include <tools/kernelrtl/strings.hpp>
 
 #endif

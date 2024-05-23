@@ -16,8 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef TOOLS_REPLIB_PRINTF_HPP
-#define TOOLS_REPLIB_PRINTF_HPP
+#ifndef TOOLS_REPLIB_STRINGS_HPP
+#define TOOLS_REPLIB_STRINGS_HPP
 
 #include <kernel/types.hpp>
 
@@ -25,9 +25,8 @@ using namespace tacOS::Kernel;
 
 namespace tacOS {
 namespace Tools {
-    namespace RepLib {
-        void printf(u64 Num, int Base = 10);
-        void printf(char* Str);
+    namespace KernelRTL {
+        i32 strncmp(const char* s1, const char* s2, usize len); 
     }
 }
 }

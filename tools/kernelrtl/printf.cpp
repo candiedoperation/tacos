@@ -18,14 +18,14 @@
 
 #include <kernel/types.hpp>
 #include <drivers/video/vga.hpp>
-#include <tools/replib/printf.hpp>
+#include <tools/kernelrtl/printf.hpp>
 
 using namespace tacOS::Tools;
 using namespace tacOS::Drivers::Video;
 
 /// @brief Draft printf Function (u64 Only)
 /// @param Num u64 Integer
-void RepLib::printf(u64 Num, int Base) {
+void KernelRTL::printf(u64 Num, int Base) {
     char* map = "0123456789ABCDEF";
     char tmp[21];
     tmp[20] = '\0';
@@ -42,7 +42,7 @@ void RepLib::printf(u64 Num, int Base) {
 
 /// @brief Draft printf Function for Strings
 /// @param Str String to Print
-void RepLib::printf(char* Str) {
+void KernelRTL::printf(char* Str) {
     /* Future Might Include Glyphs, Etc? */
     VgaTextMode::BufferWrite(Str);
 }

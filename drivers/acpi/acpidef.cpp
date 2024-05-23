@@ -18,11 +18,11 @@
 
 #include <drivers/acpi/acpipvdr.hpp>
 #include <drivers/video/vga.hpp>
-#include <tools/replib/replib.hpp>
+#include <tools/kernelrtl/kernelrtl.hpp>
 
 using namespace tacOS::Drivers::Acpi;
 using namespace tacOS::Drivers::Video;
-using namespace tacOS::Tools::RepLib;
+using namespace tacOS::Tools::KernelRTL;
 
 /// @brief Checks if current string is RSD PTR
 /// @param Signature Pointer to 8 byte Signature String
