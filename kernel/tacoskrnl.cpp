@@ -47,7 +47,7 @@ extern "C" void LoadKernel(u64 MultibootInfoAddr)
 
     /* FUTURE: Setup Linear Framebuffer Display */
     printf("\ntacOS Kernel Initializing...\n");
-    
+
     /* Setup Memory */
     VirtMem::PageMap::Intialize();
 

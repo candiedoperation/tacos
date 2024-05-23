@@ -54,6 +54,28 @@ void PhysicalMemory::Initialize()
     ProcessMBootMemoryMap(MBootMemoryMap);
 }
 
+/// @brief Allocates a block of Physical Memory
+/// @return Pointer to the allocated block of Memory
+PhysicalMemory::PhysicalAddress* PhysicalMemory::AllocateBlock() {
+    if (FreeBlocksCount < 1)        
+        return 0;
+    
+    /* Pop the Address off the stack */
+    PhysicalAddress AllocatedBlock = *(--AvailableBlocksPtr);
+    *AvailableBlocksPtr = 0;
+    FreeBlocksCount--;
+    
+    /* Return Pointer to Allocated Address */
+    return (PhysicalAddress*) AllocatedBlock;
+}
+
+/// @brief Frees a block of Physical Memory
+/// @param BaseAddress Pointer to an existing block of Memory
+void PhysicalMemory::FreeBlock(PhysicalAddress* BaseAddress) {
+    *(AvailableBlocksPtr++) = (u64) BaseAddress;
+    FreeBlocksCount++;
+}
+
 /// @brief Process Multiboot Memory Map Entry
 /// @param MemoryMap Pointer to Multiboot2 Memory Map Entry
 void PhysicalMemory::ProcessMBootMemoryMap(MBootDef::MemoryMap* MemoryMap)

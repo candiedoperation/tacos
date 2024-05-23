@@ -39,6 +39,8 @@ namespace Kernel {
         
         static void Initialize();
         static void ProcessMBootMemoryMap(MBootDef::MemoryMap* MemoryMap);
+        static PhysicalAddress* AllocateBlock();
+        static void FreeBlock(PhysicalAddress* BaseAddress);
     };
 }
 }
