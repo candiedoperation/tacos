@@ -53,6 +53,15 @@ namespace Kernel {
             IMG_PHY_ADDR = 21
         };
 
+        /// @brief BIOS Memory Map Entry Type Enumeration
+        enum MemoryMapEntryType {
+            AVAILABLE = 1,
+            RESERVED = 2,
+            ACPI_INFO = 3,
+            HIBERNATE = 4,
+            DEFECTIVE = 5
+        };
+
         struct TagHeader {
             u32 TagType;
             u32 Size;

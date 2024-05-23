@@ -19,6 +19,7 @@
 #include <kernel/mem/pagemap.hpp>
 #include <tools/replib/replib.hpp>
 #include <drivers/acpi/acpipvdr.hpp>
+#include <kernel/mem/physicalmm.hpp>
 #include <kernel/multiboot/mbpvdr.hpp>
 #include <kernel/interrupts/intrdef.hpp>
 
@@ -42,6 +43,7 @@ extern "C" void LoadKernel(u64 MultibootInfoAddr)
     /* Perform Early Initialization */
     Interrupt::Register();                         // FUTURE: IMPROVE ROUTINES, NAMING.
     MBootProvider::Initialize(MultibootInfoAddr);  // FUTURE: Returns Status, Use it
+    PhysicalMemory::Initialize();
 
     /* FUTURE: Setup Linear Framebuffer Display */
     printf("\ntacOS Kernel Initializing...\n");

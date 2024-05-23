@@ -23,6 +23,8 @@ using namespace tacOS::Tools::RepLib;
 
 /* Define Statics */
 MBootDef::MultibootInfo* MBootProvider::MBootInfoPtr;
+MBootDef::MemoryMap* MBootProvider::MemoryMapPtr;
+MBootDef::MemoryInfo* MBootProvider::MemoryInfoPtr;
 
 /// @brief Parses Multiboot Structres and Inits appropriate structures
 /// @param MultibootInfoPtrAddress Multiboot2 Pointer Address from Bootloader
@@ -54,7 +56,7 @@ int MBootProvider::Initialize(u64 MultibootInfoPtrAddress)
         }
 
         case MBootDef::Tag::MEMORY_MAP: {
-            ProcessMemoryMap((MBootDef::MemoryMap*)MBootInfoTag);
+            MBootProvider::MemoryMapPtr = (MBootDef::MemoryMap*)MBootInfoTag;
             break;
         }
 
@@ -84,29 +86,4 @@ void MBootProvider::ProcessMemoryInfo(MBootDef::MemoryInfo* MemoryInfo)
     printf("\n    Upper Memory: ");
     printf(MemoryInfo->MemUpper);
     printf("KB\n\n");
-}
-
-/// @brief Processed obtained Memory Map Entry
-/// @param MemoryMap Pointer to Multiboot2 Memory Map Entry
-void MBootProvider::ProcessMemoryMap(MBootDef::MemoryMap* MemoryMap)
-{
-    /* FUTURE: USE DEBUG STATEMENTS? */
-    printf("\nBIOS Memory Map: ");
-
-    for (
-        MBootDef::MemoryMapEntry* MMapEntry = (MBootDef::MemoryMapEntry*)(MemoryMap + 1);
-        ((u8*)MMapEntry) - ((u8*)(MemoryMap + 1)) < (MemoryMap->Header.Size - sizeof(MBootDef::MemoryMap));
-        MMapEntry = (MBootDef::MemoryMapEntry*)((u8*)MMapEntry + MemoryMap->EntrySize)) {
-
-        printf("\n    Region Start: 0x");
-        printf(MMapEntry->BaseAddress, 16);
-        printf(", Length: ");
-        printf(MMapEntry->Length / 1024);
-        printf("KB, Type: ");
-        printf(MMapEntry->Type);
-        printf(MMapEntry->Reserved == true ? (char* ) " (Reserved)" : (char *) " (Available)");
-    }
-
-    /* Looks Nice? ;-) */
-    printf("\n");
 }

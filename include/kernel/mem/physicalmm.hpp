@@ -16,25 +16,29 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef KERNEL_MBOOTPVDR_HPP
-#define KERNEL_MBOOTPVDR_HPP
+#ifndef KERNEL_PHYSICALMM_HPP
+#define KERNEL_PHYSICALMM_HPP
 
-#include <kernel/multiboot/mbdef.hpp>
 #include <kernel/types.hpp>
+#include <kernel/multiboot/mbpvdr.hpp>
 
-using namespace tacOS::Kernel;
+#define KERNEL_PHYSICALMM_BLOCKSIZE 4096
+#define KERNEL_PHYSICALMM_BLOCKALIGN KERNEL_PHYSICALMM_BLOCKSIZE
 
 namespace tacOS {
 namespace Kernel {
-    /// @brief Multiboot 2 Support Routines
-    class MBootProvider {
+    class PhysicalMemory {
     public:
-        static MBootDef::MultibootInfo* MBootInfoPtr;
-        static MBootDef::MemoryMap* MemoryMapPtr;
-        static MBootDef::MemoryInfo* MemoryInfoPtr;
-
-        static int Initialize(u64 MultibootInfoPtrAddress);
-        static void ProcessMemoryInfo(MBootDef::MemoryInfo* MemoryInfo);
+        /// @brief u64 Memory Address
+        typedef u64 PhysicalAddress;
+        
+        static PhysicalAddress* AvailableBlocksPtr;
+        static u64 TotalBlocksCount;
+        static u64 FreeBlocksCount;
+        static u64 TotalMemoryBytes;
+        
+        static void Initialize();
+        static void ProcessMBootMemoryMap(MBootDef::MemoryMap* MemoryMap);
     };
 }
 }

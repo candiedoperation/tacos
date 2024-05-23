@@ -1,7 +1,11 @@
 ENTRY(osload)
 
 SECTIONS {
+    /* The Current Location is set to 1MB */
     . = 1M;
+    
+    /* Define a symbol to Indicate Kernel Start in Memory */
+    KRNL_START = .;
 
     .boot :
     {
@@ -28,4 +32,7 @@ SECTIONS {
     {
         *(.text)
     }
+
+    /* Define a Symbol to indicate Kernel End in Memory */
+    KRNL_END = .;
 }
