@@ -38,7 +38,7 @@ void PhysicalMemory::Initialize()
         This routine initializes the Physical Memory Management
         component of the kernel. We're using a stack-based appr
         -oach so that we have a O(1) complexity for both alloc
-        -ation and de-allocation.
+        -ation and de-allocation. FUTURE: Use RLE based Stack.
 
         Refer:
         http://www.osdever.net/tutorials/view/memory-management-1
@@ -52,12 +52,20 @@ void PhysicalMemory::Initialize()
     /* Populate Stack using Multiboot Memory Map */
     MBootDef::MemoryMap* MBootMemoryMap = MBootProvider::MemoryMapPtr;
     ProcessMBootMemoryMap(MBootMemoryMap);
+
+    /* Print Memory Stats */
+    MemoryStats MemoryStatistics = GetMemoryStatistics();
+    printf("\nPhysical Memory Statistics:\n");
+    printf((MemoryStatistics.TotalBlocksCount - MemoryStatistics.FreeBlocksCount) * MemoryStatistics.BlockSize / 1024);
+    printf("KB Used, ");
+    printf(MemoryStatistics.FreeBlocksCount * MemoryStatistics.BlockSize / 1024);
+    printf("KB Free\n");
 }
 
 /// @brief Allocates a block of Physical Memory
 /// @return Pointer to the allocated block of Memory
 PhysicalMemory::PhysicalAddress* PhysicalMemory::AllocateBlock() {
-    if (FreeBlocksCount < 1)        
+    if (FreeBlocksCount < 1)  // FUTURE: Don't Provide Addresses of Stack!      
         return 0;
     
     /* Pop the Address off the stack */
@@ -74,6 +82,16 @@ PhysicalMemory::PhysicalAddress* PhysicalMemory::AllocateBlock() {
 void PhysicalMemory::FreeBlock(PhysicalAddress* BaseAddress) {
     *(AvailableBlocksPtr++) = (u64) BaseAddress;
     FreeBlocksCount++;
+}
+
+/// @brief Fetches the Current Memory Pool Statistics
+/// @return A MemoryStats Structure
+PhysicalMemory::MemoryStats PhysicalMemory::GetMemoryStatistics() {
+    MemoryStats MemoryStatistics;
+    MemoryStatistics.TotalBlocksCount = TotalBlocksCount;
+    MemoryStatistics.FreeBlocksCount = FreeBlocksCount;
+    MemoryStatistics.BlockSize = KERNEL_PHYSICALMM_BLOCKSIZE;
+    return MemoryStatistics;
 }
 
 /// @brief Process Multiboot Memory Map Entry
@@ -100,6 +118,7 @@ void PhysicalMemory::ProcessMBootMemoryMap(MBootDef::MemoryMap* MemoryMap)
             u64 DiscoveredBlocks = (MMapEntry->Length / KERNEL_PHYSICALMM_BLOCKSIZE);
             FreeBlocksCount += DiscoveredBlocks;
             TotalBlocksCount += DiscoveredBlocks;
+            TotalMemoryBytes += MMapEntry->Length;
 
             for (u64 Offset = 0; Offset < DiscoveredBlocks; Offset++) {
                 /* Push Available Memory Locations to Stack */

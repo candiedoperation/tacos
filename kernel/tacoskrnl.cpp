@@ -16,11 +16,11 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <kernel/mem/pagemap.hpp>
 #include <drivers/acpi/acpipvdr.hpp>
-#include <kernel/mem/physicalmm.hpp>
-#include <kernel/multiboot/mbpvdr.hpp>
 #include <kernel/interrupts/intrdef.hpp>
+#include <kernel/mem/physicalmm.hpp>
+#include <kernel/mem/virtualmm.hpp>
+#include <kernel/multiboot/mbpvdr.hpp>
 #include <tools/kernelrtl/kernelrtl.hpp>
 
 using namespace tacOS::Tools::KernelRTL;
@@ -41,15 +41,15 @@ extern "C" void LoadKernel(u64 MultibootInfoAddr)
     clear_screen();
 
     /* Perform Early Initialization */
-    Interrupt::Register();                         // FUTURE: IMPROVE ROUTINES, NAMING.
-    MBootProvider::Initialize(MultibootInfoAddr);  // FUTURE: Returns Status, Use it
+    Interrupt::Register(); // FUTURE: IMPROVE ROUTINES, NAMING.
+    MBootProvider::Initialize(MultibootInfoAddr); // FUTURE: Returns Status, Use it
+
+    /* Setup Memory */
     PhysicalMemory::Initialize();
+    VirtualMemory::Intialize();
 
     /* FUTURE: Setup Linear Framebuffer Display */
     printf("\ntacOS Kernel Initializing...\n");
-
-    /* Setup Memory */
-    VirtMem::PageMap::Intialize();
 
     /* Setup ACPI */
     AcpiDef::Status AcpiInitStatus = AcpiProvider::Initialize();
@@ -59,7 +59,7 @@ extern "C" void LoadKernel(u64 MultibootInfoAddr)
     }
 
     /* Enable HW Interrupts */
-    //Interrupt::InitHWInterrupts();
+    // Interrupt::InitHWInterrupts();
 
     /* Check if CPU Exceptions and Interrupts Interrupts Work! */
     // int DivByZ = 1/0;

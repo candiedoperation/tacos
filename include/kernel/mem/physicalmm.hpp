@@ -32,6 +32,13 @@ namespace Kernel {
         /// @brief u64 Memory Address
         typedef u64 PhysicalAddress;
         
+        /// @brief Memory Statistics
+        struct MemoryStats {
+            u64 TotalBlocksCount;
+            u64 FreeBlocksCount;
+            u64 BlockSize;
+        };
+
         static PhysicalAddress* AvailableBlocksPtr;
         static u64 TotalBlocksCount;
         static u64 FreeBlocksCount;
@@ -41,6 +48,7 @@ namespace Kernel {
         static void ProcessMBootMemoryMap(MBootDef::MemoryMap* MemoryMap);
         static PhysicalAddress* AllocateBlock();
         static void FreeBlock(PhysicalAddress* BaseAddress);
+        static MemoryStats GetMemoryStatistics();
     };
 }
 }
