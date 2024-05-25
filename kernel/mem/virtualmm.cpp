@@ -20,11 +20,14 @@
 
 using namespace tacOS::Kernel;
 
+/* osloader.asm Page Tables */
+extern u64 osloader_pml4t[512];
+
 /* Define Statics */
 VirtualMemory::PML4Entry VirtualMemory::PML4Table[KERNEL_VIRTMM_MAXPML4E];
-alignas(4096) static VirtualMemory::PDPEntry PDPTable0[KERNEL_VIRTMM_MAXPDPTE];
-alignas(4096) static VirtualMemory::PDEntry PDTable0[KERNEL_VIRTMM_MAXPDE];
-alignas(4096) static VirtualMemory::PTEntry PTable0[KERNEL_VIRTMM_MAXPTE];
+static VirtualMemory::PDPEntry PDPTable0[KERNEL_VIRTMM_MAXPDPTE];
+static VirtualMemory::PDEntry PDTable0[KERNEL_VIRTMM_MAXPDE];
+static VirtualMemory::PTEntry PTable0[KERNEL_VIRTMM_MAXPTE];
 
 /// @brief Setup Structures, Configure Memory Paging
 void VirtualMemory::Intialize()
@@ -58,4 +61,5 @@ void VirtualMemory::Intialize()
     PML4Table[0] = ((u64) PDPTable0) | 3;
 
     __asm__ volatile ("mov %0, %%cr3" : : "r" (PML4Table) : "memory");
+    __asm__ volatile ("mov %0, %%cr3" : : "r" (osloader_pml4t) : "memory");
 }

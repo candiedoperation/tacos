@@ -16,6 +16,7 @@
 
 global osload
 global mboot_ebx
+global osloader_pml4t
 extern os64load
 
 section .multiboot
@@ -57,13 +58,13 @@ section .data
 
 section .bss
 align 4096
-pml4_table:
+osloader_pml4t:
     resb 4096
-pdp_table:
+osloader_pdpt:
     resb 4096
-pd_table:
+osloader_pdt:
     resb 4096
-page_table:
+osloader_ptbl:
     resb 4096
 
 section .text
@@ -185,14 +186,14 @@ error_lm:
 ; Setup Basic Paging
 memory_paging:
     ; Map PDP Table to first PML4 Entry
-    mov edx, pdp_table ; Move Memory Address of pdp_table to edx
+    mov edx, osloader_pdpt ; Move Memory Address of osloader_pdpt to edx
     or edx, 0b11 ; Present + Writable bits
-    mov [pml4_table], edx ; Move edx to pml4_table's first index
+    mov [osloader_pml4t], edx ; Move edx to osloader_pml4t's first index
 
     ; Map PD Table to first PDP Table Entry
-    mov edx, pd_table
+    mov edx, osloader_pdt
     or edx, 0b11
-    mov [pdp_table], edx
+    mov [osloader_pdpt], edx
 
     ; Map each PD Table entry to a 2MB Page
     mov ecx, 0
@@ -200,7 +201,7 @@ memory_paging:
         mov eax, 0x200000
         mul ecx ; ecx -> source, eax -> destination (implied)
         or eax, 0b10000011 ; present + writable + huge
-        mov [pd_table + (ecx * 8)], eax
+        mov [osloader_pdt + (ecx * 8)], eax
 
         inc ecx
         cmp ecx, 512
@@ -208,7 +209,7 @@ memory_paging:
     
     enable_paging:
     ; Load PML4 Table to CR3 Register
-    mov eax, pml4_table
+    mov eax, osloader_pml4t
     mov cr3, eax
 
     ; Enable Physical Address Extension (PAE) using the CR4 Register

@@ -16,6 +16,7 @@ KRNL_DEPENDENCIES = $(BUILD_PATH)/osloader/osloader.o \
 					$(BUILD_PATH)/drivers/acpi/acpidef.o \
 					$(BUILD_PATH)/drivers/acpi/acpipvdr.o \
 					$(BUILD_PATH)/drivers/video/vga.o \
+					$(BUILD_PATH)/kernel/assert/logging.o \
 					$(BUILD_PATH)/kernel/mem/physicalmm.o \
 					$(BUILD_PATH)/kernel/mem/virtualmm.o \
 					$(BUILD_PATH)/kernel/multiboot/mbpvdr.o \

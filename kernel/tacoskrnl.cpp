@@ -17,13 +17,12 @@
 */
 
 #include <drivers/acpi/acpipvdr.hpp>
+#include <kernel/assert/logging.hpp>
 #include <kernel/interrupts/intrdef.hpp>
 #include <kernel/mem/physicalmm.hpp>
 #include <kernel/mem/virtualmm.hpp>
 #include <kernel/multiboot/mbpvdr.hpp>
-#include <tools/kernelrtl/kernelrtl.hpp>
 
-using namespace tacOS::Tools::KernelRTL;
 using namespace tacOS::Drivers::Acpi;
 using namespace tacOS::Kernel;
 
@@ -49,17 +48,18 @@ extern "C" void LoadKernel(u64 MultibootInfoAddr)
     VirtualMemory::Intialize();
 
     /* FUTURE: Setup Linear Framebuffer Display */
-    printf("\ntacOS Kernel Initializing...\n");
+
+    Logging::LogMessage(Logging::LogLevel::INFO, "\ntacOS Kernel Initializing...\n");
 
     /* Setup ACPI */
     AcpiDef::Status AcpiInitStatus = AcpiProvider::Initialize();
     if (!AcpiInitStatus) {
-        printf("ACPI Version Unsupported");
+        Logging::LogMessage(Logging::LogLevel::CRITICAL, "ACPI Version Unsupported");
         __asm__ volatile("cli; hlt");
     }
 
     /* Enable HW Interrupts */
-    // Interrupt::InitHWInterrupts();
+    Interrupt::InitHWInterrupts();
 
     /* Check if CPU Exceptions and Interrupts Interrupts Work! */
     // int DivByZ = 1/0;
