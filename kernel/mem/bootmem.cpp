@@ -17,6 +17,8 @@
 */
 
 #include <kernel/mem/bootmem.hpp>
+#include <kernel/mem/virtualmm.hpp>
+#include <kernel/mem/physicalmm.hpp>
 #include <kernel/assert/logging.hpp>
 #include <tools/kernelrtl/kernelrtl.hpp>
 
@@ -31,7 +33,8 @@ u64 BootMem::PhysicalFreeBlocks;
 u64 BootMem::PhysicalTotalBlocks;
 u64* BootMem::PhysicalMemoryMap;
 
-void BootMem::Initialize() {
+void BootMem::Initialize()
+{
     /*
         The initialization routine involves initializing a minimal
         Bitmap-based Physical Memory Manager. A stack-based approach
@@ -50,20 +53,15 @@ void BootMem::Initialize() {
     */
 
     /* Initialize the Physical Memory Map (Bitmap Based) */
-    u64 BitmapAddress = AlignAddressToPage((u64) &KRNL_END);
-    u64 MBootInfoEndAddr = ((u64) MBootProvider::MBootInfoPtr) + MBootProvider::MBootInfoPtr->Length;
-    
+    u64 BitmapAddress = AlignAddressToPage((u64)&KRNL_END);
+    u64 MBootInfoEndAddr = ((u64)MBootProvider::MBootInfoPtr) + MBootProvider::MBootInfoPtr->Length;
+
     /* Check if Multiboot Structure is After Chosen Address */
     if (MBootInfoEndAddr > BitmapAddress)
         BitmapAddress = AlignAddressToPage(MBootInfoEndAddr + 1);
 
     /* Allocate Address to Physical Memory Map */
-    PhysicalMemoryMap = (u64*) (BitmapAddress);
-
-    printf("\nBMA: 0x");
-    printf(BitmapAddress, 16);
-    printf("\nMBE: 0x");
-    printf(MBootInfoEndAddr, 16);
+    PhysicalMemoryMap = (u64*)(BitmapAddress);
 
     /* Populate Memory Information using the Multiboot Memory Map */
     MBootDef::MemoryMap* MBootMemoryMap = MBootProvider::MemoryMapPtr;
@@ -73,17 +71,39 @@ void BootMem::Initialize() {
     Logging::LogMessage(Logging::LogLevel::DEBUG, "Bootmem Allocator Init Complete");
 }
 
+/// @brief Allocate a Block of Physical Memory
+/// @return Pointer to Allocated Block
+BootMem::PhysicalAddress* BootMem::PhysicalMemoryAllocateBlock()
+{
+    /* Get First Free Location, Check if Out of Memory */
+    u64 Frame = GetPhysicalMemoryMapFreeIndex();
+    if (Frame == -1)
+        return 0;
+
+    /* Set Frame Allocated, Update Free Frames */
+    PhysicalMemoryMapSet(Frame);
+    PhysicalFreeBlocks--;
+
+    /* Return Physical Address */
+    return (PhysicalAddress*)(Frame * KERNEL_BOOTMEM_PMMGR_BLOCKSIZE);
+}
+
 /// @brief Gets the Next Free Physical Memory Location from Bitmap
 /// @return Physical Memory Address
-u64 BootMem::GetPhysicalMemoryMapFreeIndex() {
+u64 BootMem::GetPhysicalMemoryMapFreeIndex()
+{
+    /* Check if Out of Memory */
+    if (PhysicalFreeBlocks < 1)
+        return -1;
+
     for (u64 i = 0; i < (PhysicalTotalBlocks / 64); i++) {
         /* Check if Block isn't Full */
-        if (PhysicalMemoryMap[i] != 0xFFFFFFFF) {
+        if (PhysicalMemoryMap[i] != 0xFFFFFFFFFFFFFFFF) {
             /* Check each bit in Block to find an Empty Address */
             for (u8 j = 0; j < 64; j++) {
-                u64 Bit = 1 << j;
-                if (!PhysicalMemoryMap[i] & Bit)
-                    return (i * 8 * 8) + j;
+                u64 Bit = 1ULL << j;
+                if (!(PhysicalMemoryMap[i] & Bit))
+                    return (i * 64) + j;
             }
         }
     }
@@ -92,7 +112,8 @@ u64 BootMem::GetPhysicalMemoryMapFreeIndex() {
     return -1;
 }
 
-void BootMem::PopulateMBootMemoryInfo(MBootDef::MemoryMap* MemoryMap) {
+void BootMem::PopulateMBootMemoryInfo(MBootDef::MemoryMap* MemoryMap)
+{
     for (
         MBootDef::MemoryMapEntry* MMapEntry = (MBootDef::MemoryMapEntry*)(MemoryMap + 1);
         ((u8*)MMapEntry) - ((u8*)(MemoryMap + 1)) < (MemoryMap->Header.Size - sizeof(MBootDef::MemoryMap));
@@ -103,7 +124,7 @@ void BootMem::PopulateMBootMemoryInfo(MBootDef::MemoryMap* MemoryMap) {
         u64 AlignedBaseAddr = (MMapEntry->BaseAddress / KERNEL_BOOTMEM_PMMGR_BLOCKSIZE);
         PhysicalTotalBlocks += DiscoveredBlocks;
 
-        if (MMapEntry->Type == MBootDef::MemoryMapEntryType::AVAILABLE) {            
+        if (MMapEntry->Type == MBootDef::MemoryMapEntryType::AVAILABLE) {
             /* Update Free Blocks Count and Mark As Available */
             PhysicalFreeBlocks += DiscoveredBlocks;
             for (; DiscoveredBlocks > 0; DiscoveredBlocks--) {

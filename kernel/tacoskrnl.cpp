@@ -49,12 +49,10 @@ extern "C" void LoadKernel(u64 MultibootInfoAddr)
 
     /* FUTURE: Setup Linear Framebuffer Display */
 
-    Logging::LogMessage(Logging::LogLevel::INFO, "tacOS Kernel Initializing...");
-
     /* Setup ACPI */
     AcpiDef::Status AcpiInitStatus = AcpiProvider::Initialize();
     if (!AcpiInitStatus) {
-        Logging::LogMessage(Logging::LogLevel::CRITICAL, "ACPI Version Unsupported");
+        Logging::LogMessage(Logging::LogLevel::CRITICAL, "ACPI Version Unsupported, Aborting Boot");
         __asm__ volatile("cli; hlt");
     }
 
@@ -63,6 +61,9 @@ extern "C" void LoadKernel(u64 MultibootInfoAddr)
 
     /* Check if CPU Exceptions and Interrupts Interrupts Work! */
     // int DivByZ = 1/0;
+
+    /* Log Init Complete */
+    Logging::LogMessage(Logging::LogLevel::INFO, "tacOS Kernel Init Complete!");
 
     for (;;) {
         /*
