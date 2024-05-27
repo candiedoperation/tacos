@@ -66,6 +66,8 @@ osloader_pdt:
     resb 4096
 osloader_ptbl:
     resb 4096
+osloader_ptbl2:
+    resb 4096
 
 section .text
 bits 32 ; Set CPU to 32 Bit Protected Mode
@@ -80,12 +82,9 @@ osload:
     push msg_head
     call print
 
-    ; Check CPU Capabilities
+    ; Check CPU Capabilities and Enable Paging
     call cpu_check
-
-    ; Enable Long Mode
     call memory_paging
-    call enable_paging
 
     ; Load GDT, Perform Long Jump
     lgdt [gdt64.pointer]
@@ -195,20 +194,24 @@ memory_paging:
     or edx, 0b11
     mov [osloader_pdpt], edx
 
+    ; Map Page Table to first PD Entry
+    mov edx, osloader_ptbl
+    or edx, 0b11
+    mov [osloader_pdt], edx
+
     ; Map each PD Table entry to a 2MB Page
     mov ecx, 0
-    map_pd:
-        mov eax, 0x200000
+    map_ptbl:
+        mov eax, 4096 ; 4KiB Pages
         mul ecx ; ecx -> source, eax -> destination (implied)
-        or eax, 0b10000011 ; present + writable + huge
-        mov [osloader_pdt + (ecx * 8)], eax
+        or eax, 0b00000011 ; present + writable
+        mov [osloader_ptbl + (ecx * 8)], eax
 
         inc ecx
         cmp ecx, 512
-        jne map_pd
+        jne map_ptbl
     
-    enable_paging:
-    ; Load PML4 Table to CR3 Register
+    ; Enable Paging (Load PML4 Table to CR3 Register)
     mov eax, osloader_pml4t
     mov cr3, eax
 

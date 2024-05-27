@@ -19,8 +19,7 @@
 #include <drivers/acpi/acpipvdr.hpp>
 #include <kernel/assert/logging.hpp>
 #include <kernel/interrupts/intrdef.hpp>
-#include <kernel/mem/physicalmm.hpp>
-#include <kernel/mem/virtualmm.hpp>
+#include <kernel/mem/bootmem.hpp>
 #include <kernel/multiboot/mbpvdr.hpp>
 
 using namespace tacOS::Drivers::Acpi;
@@ -43,13 +42,14 @@ extern "C" void LoadKernel(u64 MultibootInfoAddr)
     Interrupt::Register(); // FUTURE: IMPROVE ROUTINES, NAMING.
     MBootProvider::Initialize(MultibootInfoAddr); // FUTURE: Returns Status, Use it
 
-    /* Setup Memory */
-    PhysicalMemory::Initialize();
-    VirtualMemory::Intialize();
+    /* Setup Memory Bootstrapping */
+    BootMem::Initialize();
+    //PhysicalMemory::Initialize();
+    //VirtualMemory::Intialize();
 
     /* FUTURE: Setup Linear Framebuffer Display */
 
-    Logging::LogMessage(Logging::LogLevel::INFO, "\ntacOS Kernel Initializing...\n");
+    Logging::LogMessage(Logging::LogLevel::INFO, "tacOS Kernel Initializing...");
 
     /* Setup ACPI */
     AcpiDef::Status AcpiInitStatus = AcpiProvider::Initialize();
@@ -59,7 +59,7 @@ extern "C" void LoadKernel(u64 MultibootInfoAddr)
     }
 
     /* Enable HW Interrupts */
-    Interrupt::InitHWInterrupts();
+    //Interrupt::InitHWInterrupts();
 
     /* Check if CPU Exceptions and Interrupts Interrupts Work! */
     // int DivByZ = 1/0;

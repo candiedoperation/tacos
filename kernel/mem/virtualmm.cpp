@@ -16,18 +16,41 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <kernel/assert/logging.hpp>
+#include <kernel/mem/physicalmm.hpp>
 #include <kernel/mem/virtualmm.hpp>
+#include <tools/kernelrtl/kernelrtl.hpp>
 
 using namespace tacOS::Kernel;
 
 /* osloader.asm Page Tables */
-extern u64 osloader_pml4t[512];
+extern VirtualMemory::PML4Table osloader_pml4t;
 
 /* Define Statics */
-VirtualMemory::PML4Entry VirtualMemory::PML4Table[KERNEL_VIRTMM_MAXPML4E];
-static VirtualMemory::PDPEntry PDPTable0[KERNEL_VIRTMM_MAXPDPTE];
-static VirtualMemory::PDEntry PDTable0[KERNEL_VIRTMM_MAXPDE];
-static VirtualMemory::PTEntry PTable0[KERNEL_VIRTMM_MAXPTE];
+static VirtualMemory::PML4Table PML4Table0 alignas(4096);
+static VirtualMemory::PDPTable PDPTable0;
+static VirtualMemory::PDTable PDTable0;
+static VirtualMemory::PTable PTable0;
+static VirtualMemory::PTable PTable1;
+
+/// @brief
+/// @param PML4Table
+/// @return
+VirtualMemory::VirtualAddress* VirtualMemory::AllocateBlock(PML4Table* PML4TablePtr)
+{
+    /* Allocate a Physical Memory Block */
+    PhysicalMemory::PhysicalAddress PhyAddress
+        = (PhysicalMemory::PhysicalAddress)(PhysicalMemory::AllocateBlock());
+
+    if (PhyAddress == 0)
+        return 0;
+
+    VirtualAddress VirtAddress = (PhyAddress + KERNEL_VIRTMM_PHYMEM_MAPOFFSET);
+    Tools::KernelRTL::printf("Physical Address 0x");
+    Tools::KernelRTL::printf(PhyAddress, 16);
+    Tools::KernelRTL::printf(" -> Virtual Address 0x");
+    Tools::KernelRTL::printf(VirtAddress, 16);
+}
 
 /// @brief Setup Structures, Configure Memory Paging
 void VirtualMemory::Intialize()
@@ -50,16 +73,19 @@ void VirtualMemory::Intialize()
 
     /* Identity Map first 2MB of Physical Memory */
     for (int i = 0; i < KERNEL_VIRTMM_MAXPTE; i++) {
-        PTable0[i] = (i * KERNEL_VIRTMM_PAGESIZE) | 3;
+        PTable0.Entries[i] = (i * KERNEL_VIRTMM_PAGESIZE) | 3;
     }
 
-    /* Use Dynamic Structure and Map that before loading? */
-
     /* 1g is identify mapped by osloader.asm */
-    PDTable0[0] = ((u64) PTable0) | 3;
-    PDPTable0[0] = ((u64) PDTable0) | 3;
-    PML4Table[0] = ((u64) PDPTable0) | 3;
+    PDTable0.Entries[0] = ((u64) &PTable0) | 3;
+    PDPTable0.Entries[0] = ((u64) &PDTable0) | 3;
+    PML4Table0.Entries[0] = ((u64) &PDPTable0) | 3;
+    
+    /* Directly Map 2MB of Available Physical Memory */
+    for (int i = 0; i < KERNEL_VIRTMM_MAXPTE; i++) {
+        //PhysicalMemory::AvailableBlocksPtr
+    }
 
-    __asm__ volatile ("mov %0, %%cr3" : : "r" (PML4Table) : "memory");
-    __asm__ volatile ("mov %0, %%cr3" : : "r" (osloader_pml4t) : "memory");
+    __asm__ volatile ("mov %0, %%cr3" : : "r" (&PML4Table0) : "memory");
+    //__asm__ volatile("mov %0, %%cr3" : : "r"(&osloader_pml4t) : "memory");
 }

@@ -26,6 +26,11 @@
 #define KERNEL_VIRTMM_MAXPDPTE 512
 #define KERNEL_VIRTMM_MAXPDE 512
 #define KERNEL_VIRTMM_MAXPTE 512
+#define KERNEL_VIRTMM_PAGEMASK 0x1FF /* 0001 1111 1111 (9 bits) */
+
+/* Virtual Address Space Offsets */
+#define KERNEL_VIRTMM_PHYMEM_MAPOFFSET 0xffff888000000000
+#define KERNEL_VIRTMM_PHYMEM_MAPOFFSETEND 0xffffc87fffffffff
 
 namespace tacOS {
 namespace Kernel {
@@ -93,7 +98,39 @@ namespace Kernel {
             HLAT_RST = 1 << 11
         };
 
-        alignas(4096) static PML4Entry PML4Table[KERNEL_VIRTMM_MAXPML4E];
+        struct PML4Table {
+            PML4Entry Entries[KERNEL_VIRTMM_MAXPML4E];
+        };
+
+        struct PDPTable {
+            PDPEntry Entries[KERNEL_VIRTMM_MAXPDPTE];
+        };
+
+        struct PDTable {
+            PDEntry Entries[KERNEL_VIRTMM_MAXPDE];
+        };
+
+        struct PTable {
+            PTEntry Entries[KERNEL_VIRTMM_MAXPTE];
+        };
+
+        static inline u64 GetPML4Index(VirtualAddress VirtAddress) {
+            return ((VirtAddress >> 39) & KERNEL_VIRTMM_PAGEMASK);
+        }
+
+        static inline u64 GetPDPTIndex(VirtualAddress VirtAddress) {
+            return ((VirtAddress >> 30) & KERNEL_VIRTMM_PAGEMASK);
+        }
+
+        static inline u64 GetPDTIndex(VirtualAddress VirtAddress) {
+            return ((VirtAddress >> 21) & KERNEL_VIRTMM_PAGEMASK);
+        }
+        
+        static inline u64 GetPTIndex(VirtualAddress VirtAddress) {
+            return ((VirtAddress >> 12) & KERNEL_VIRTMM_PAGEMASK);
+        }
+
+        static VirtualAddress* AllocateBlock(PML4Table* PML4TablePtr);
         static void Intialize();
     };
 }

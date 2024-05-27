@@ -28,6 +28,8 @@ Logging::LogLevel Logging::FilterLevel = Logging::LogLevel::DEBUG;
 void Logging::LogMessage(LogLevel Level, char* Message)
 {
     /* FUTURE: Improve this routine to meet standards */
-    if (Level >= FilterLevel)
+    if (Level >= FilterLevel) {
+        printf("\n[LOG] ");
         printf(Message);
+    }
 }
