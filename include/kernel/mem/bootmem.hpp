@@ -31,7 +31,7 @@ namespace tacOS {
 namespace Kernel {
     class BootMem {
     private:
-        static u64 GetPhysicalMemoryMapFreeIndex();
+        static u64 GetPhysicalMemoryMapFreeIndex(u64 Blocks = 1);
         static void PopulateMBootMemoryInfo(MBootDef::MemoryMap* MemoryMap);
 
     public:
@@ -62,7 +62,10 @@ namespace Kernel {
         }
 
         static void Initialize();
-        static PhysicalAddress* PhysicalMemoryAllocateBlock();
+        static PhysicalAddress* PhysicalMemoryAllocateBlock(u64 Size = 1);
+        static void PhysicalMemoryFreeBlock(PhysicalAddress* AllocatedBlock, u64 Size = 1);
+        static VirtualAddress* VirtAllocateBlock();
+        static void VirtFreeBlock(VirtualAddress* AllocatedBlock);
     };
 }
 }

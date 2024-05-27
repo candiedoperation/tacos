@@ -16,10 +16,10 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <kernel/mem/bootmem.hpp>
-#include <kernel/mem/virtualmm.hpp>
-#include <kernel/mem/physicalmm.hpp>
 #include <kernel/assert/logging.hpp>
+#include <kernel/mem/bootmem.hpp>
+#include <kernel/mem/physicalmm.hpp>
+#include <kernel/mem/virtualmm.hpp>
 #include <tools/kernelrtl/kernelrtl.hpp>
 
 using namespace tacOS::Kernel;
@@ -37,16 +37,17 @@ void BootMem::Initialize()
 {
     /*
         The initialization routine involves initializing a minimal
-        Bitmap-based Physical Memory Manager. A stack-based approach
-        is not possible initially as only the first 2MB of the kernel
-        is identity mapped and a stack would overflow that size leading
-        to page faults while setting up paging.
+        Bitmap-based Physical Memory Manager. A stack-based approa
+        -ch is not possible initially as only the first 2MB of the
+        kernel is identity mapped and a stack would overflow that
+        size leading to page faults while setting up paging.
 
         This routine initializes Physical Memory Management for atmost
-        2MB of physical memory. Furthermore, it sets up preliminary paging
-        to allow for allocation of dynamic structures. Once this is complete,
-        the actual Physical and Virtual Memory Managers take over and map
-        the available memory completely and manage the address space thereafter.
+        4GB of physical memory. Furthermore, it sets up preliminary pa
+        -ging to allow for allocation of dynamic structures. Once this
+        is complete, the actual Physical and Virtual Memory Managers ta
+        -ke over and map the available memory completely and manage the
+        address space thereafter.
 
         Refer:
         http://www.brokenthorn.com/Resources/OSDev17.html
@@ -73,27 +74,44 @@ void BootMem::Initialize()
 
 /// @brief Allocate a Block of Physical Memory
 /// @return Pointer to Allocated Block
-BootMem::PhysicalAddress* BootMem::PhysicalMemoryAllocateBlock()
+BootMem::PhysicalAddress* BootMem::PhysicalMemoryAllocateBlock(u64 Size)
 {
     /* Get First Free Location, Check if Out of Memory */
-    u64 Frame = GetPhysicalMemoryMapFreeIndex();
+    u64 Frame = GetPhysicalMemoryMapFreeIndex(Size);
     if (Frame == -1)
         return 0;
 
-    /* Set Frame Allocated, Update Free Frames */
-    PhysicalMemoryMapSet(Frame);
-    PhysicalFreeBlocks--;
+    /* Set Frames Allocated */
+    for (u64 i = 0; i < Size; i++) {
+        PhysicalMemoryMapSet(Frame + i);
+    }
 
-    /* Return Physical Address */
+    /* Update Free Frames and Return Physical Address */
+    PhysicalFreeBlocks -= Size;
     return (PhysicalAddress*)(Frame * KERNEL_BOOTMEM_PMMGR_BLOCKSIZE);
+}
+
+/// @brief Frees an Allocated Block of Memory
+/// @param AllocatedBlock Pointer to Allocated Block
+void BootMem::PhysicalMemoryFreeBlock(PhysicalAddress* AllocatedBlock, u64 Size)
+{
+    /* Process Block Addresses */
+    u64 BaseAddress = (u64)AllocatedBlock;
+    u64 Frame = (BaseAddress / KERNEL_PHYSICALMM_BLOCKSIZE);
+
+    /* Mark as Free, Update Free Blocks */
+    PhysicalFreeBlocks += Size;
+    for (u64 i = 0; i < Size; i++) {
+        PhysicalMemoryMapUnset(Frame + i);
+    }
 }
 
 /// @brief Gets the Next Free Physical Memory Location from Bitmap
 /// @return Physical Memory Address
-u64 BootMem::GetPhysicalMemoryMapFreeIndex()
+u64 BootMem::GetPhysicalMemoryMapFreeIndex(u64 Blocks)
 {
     /* Check if Out of Memory */
-    if (PhysicalFreeBlocks < 1)
+    if (PhysicalFreeBlocks < Blocks)
         return -1;
 
     for (u64 i = 0; i < (PhysicalTotalBlocks / 64); i++) {
@@ -102,8 +120,22 @@ u64 BootMem::GetPhysicalMemoryMapFreeIndex()
             /* Check each bit in Block to find an Empty Address */
             for (u8 j = 0; j < 64; j++) {
                 u64 Bit = 1ULL << j;
-                if (!(PhysicalMemoryMap[i] & Bit))
-                    return (i * 64) + j;
+                if (!(PhysicalMemoryMap[i] & Bit)) {
+                    /* Check if requested Block Length is available */
+                    u64 FreeBlocks = 0;
+                    u64 SearchIndex = (i * 64) + j;
+
+                    for (u64 k = 0; k < Blocks; k++) {
+                        if (!PhysicalMemoryMapTest(SearchIndex + k))
+                            FreeBlocks++;
+                        
+                        else
+                            break;
+
+                        if (FreeBlocks == Blocks)
+                            return SearchIndex;
+                    }
+                }
             }
         }
     }
