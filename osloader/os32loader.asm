@@ -218,8 +218,8 @@ memory_paging:
     
     ; Enable Paging (Load PML4 Table to CR3 Register)
     call bootmem_init
-    ;mov eax, osloader_pml4t
-    ;mov cr3, eax
+    mov eax, osloader_pml4t
+    mov cr3, eax
 
     ; Enable Physical Address Extension (PAE) using the CR4 Register
     mov eax, cr4

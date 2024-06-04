@@ -35,6 +35,8 @@ os64load:
     mov rdi, [mboot_ebx]
     ;call LoadKernel
     
+    mov dword [0xb8000], 0x2f4b2f4f
+
     apple:
         hlt
         jmp apple

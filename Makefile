@@ -40,7 +40,9 @@ $(BUILD_PATH)/%.o: %.asm
 #Kernel.bin depends on linker.ld, defined files
 $(BUILD_PATH)/kernel.bin: linker.ld subdirs $(KRNL_DEPENDENCIES)
 	mkdir -p $(dir $@)
-	ld $(LD_PARAMETERS) -T $< -o $(BUILD_PATH)/kernel.bin $(BUILD_PATH)/osloader/osloader.o
+	ld $(LD_PARAMETERS) -T $< -o $@ $(BUILD_PATH)/osloader/osloader.o
+#	objcopy -O elf64-x86-64 $@
+#	ld $(LD_PARAMETERS) -T $< -o $@ $(wildcard $(BUILD_PATH)/**/*.o)
 #	objcopy -O elf32-i386 $@
 
 $(BUILD_PATH)/tacos.iso: $(BUILD_PATH)/kernel.bin

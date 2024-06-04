@@ -25,7 +25,8 @@ VMMPageTable OSLoaderPDPTbl;
 VMMPageTable OSLoaderPDTbl;
 VMMPageTable OSLoaderPTbl;
 
-extern "C" void bootmem_init() {    
+extern "C" void bootmem_init() {   
+    for (;;) {} 
     /* Identity map first 2MB */
     for (int i = 0; i < OSLOADER_VMM_PTBL_MAXENTRIES; i++) {
         OSLoaderPTbl.Entries[i] = (i * OSLOADER_VMM_BLOCKSIZE) | 3;
@@ -36,6 +37,10 @@ extern "C" void bootmem_init() {
     OSLoaderPDPTbl.Entries[0] = ((u64) &OSLoaderPDTbl) | 3;
     OSLoaderPML4Tbl.Entries[0] = ((u64) &OSLoaderPDPTbl) | 3;
 
-    __asm__ volatile ("mov %0, %%cr3" : : "r" (&osloader_pml4t) : "memory");
+    //__asm__ volatile ("mov %0, %%eax" : : "r" (&osloader_pml4t) : "memory");
+    for(;;) {
+        
+    }
+
     //__asm__ volatile ("mov %0, %%cr3" : : "r" (0x00) : "memory");
 }

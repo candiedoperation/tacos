@@ -5,11 +5,11 @@ LD_PARAMETERS = -m elf_i386 -i # -i for Incremental Linking
 
 TARGETS = os32loader.o \
 		  bootmem.o \
-		  os64loader.o \
+		  os64loader.o
 
 all: init $(TARGETS)
 	cd $(BUILD_PATH) && \
-	ld $(LD_PARAMETERS) -T ../../osloader/linker.ld $(TARGETS) -o osloader.o && \
+	ld $(LD_PARAMETERS) -T ../../linker.ld -o osloader.o $(TARGETS) && \
 	rm $(TARGETS)
 
 init:
@@ -18,7 +18,7 @@ init:
 # Compile *.cpp to *.o
 %.o: %.cpp
 	g++ $(GPP32_PARAMETERS) -o $(BUILD_PATH)/$@ -c $<
-#	objcopy -I elf32-x86-64 -O elf64-x86-64 $(BUILD_PATH)/$@
+#	objcopy -I elf32-i386 -O elf64-x86-64 $(BUILD_PATH)/$@
 
 # Compile *.asm to *.o
 %.o: %.asm
