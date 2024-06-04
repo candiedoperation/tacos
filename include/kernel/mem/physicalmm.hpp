@@ -20,6 +20,7 @@
 #define KERNEL_PHYSICALMM_HPP
 
 #include <kernel/types.hpp>
+#include <kernel/mem/bootmem.hpp>
 #include <kernel/multiboot/mbpvdr.hpp>
 
 #define KERNEL_PHYSICALMM_BLOCKSIZE 4096

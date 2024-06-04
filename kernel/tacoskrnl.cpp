@@ -19,7 +19,7 @@
 #include <drivers/acpi/acpipvdr.hpp>
 #include <kernel/assert/logging.hpp>
 #include <kernel/interrupts/intrdef.hpp>
-#include <kernel/mem/bootmem.hpp>
+//#include <kernel/mem/bootmem.hpp>
 #include <kernel/multiboot/mbpvdr.hpp>
 
 using namespace tacOS::Drivers::Acpi;
@@ -43,7 +43,7 @@ extern "C" void LoadKernel(u64 MultibootInfoAddr)
     MBootProvider::Initialize(MultibootInfoAddr); // FUTURE: Returns Status, Use it
 
     /* Setup Memory Bootstrapping */
-    BootMem::Initialize();
+    //BootMem::Initialize();
     //PhysicalMemory::Initialize();
     //VirtualMemory::Intialize();
 
@@ -57,7 +57,7 @@ extern "C" void LoadKernel(u64 MultibootInfoAddr)
     }
 
     /* Enable HW Interrupts */
-    //Interrupt::InitHWInterrupts();
+    Interrupt::InitHWInterrupts();
 
     /* Check if CPU Exceptions and Interrupts Interrupts Work! */
     // int DivByZ = 1/0;

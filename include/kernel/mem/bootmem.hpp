@@ -19,8 +19,8 @@
 #ifndef KERNEL_BOOTMEM_HPP
 #define KERNEL_BOOTMEM_HPP
 
-#include <kernel/multiboot/mbpvdr.hpp>
 #include <kernel/types.hpp>
+#include <kernel/multiboot/mbpvdr.hpp>
 
 #define KERNEL_BOOTMEM_PMMGR_BLOCKALLOCLIMIT 512 /* Max 2MB Bitmap Based Alloc */
 #define KERNEL_BOOTMEM_PMMGR_BLOCKSPERBYTE 8
@@ -32,11 +32,15 @@ namespace Kernel {
     class BootMem {
     private:
         static u64 GetPhysicalMemoryMapFreeIndex(u64 Blocks = 1);
-        static void PopulateMBootMemoryInfo(MBootDef::MemoryMap* MemoryMap);
+        static void InitializePhysicalMemory(MBootDef::MemoryMap* MemoryMap);
+        static void InitializeVirtualMemory();
 
     public:
+        /* Memory Address Abstractions */
         typedef u64 PhysicalAddress;
         typedef u64 VirtualAddress;
+        
+        /* Physical Memory Specifics */
         static u64 PhysicalFreeBlocks;
         static u64 PhysicalTotalBlocks;
         static u64* PhysicalMemoryMap;

@@ -16,7 +16,7 @@
 
 global os64load
 extern mboot_ebx
-extern LoadKernel
+;extern LoadKernel
 
 section .text
 bits 64
@@ -33,5 +33,10 @@ os64load:
 
     ; Load Kernel with Multiboot Info
     mov rdi, [mboot_ebx]
-    call LoadKernel
+    ;call LoadKernel
+    
+    apple:
+        hlt
+        jmp apple
+
     hlt

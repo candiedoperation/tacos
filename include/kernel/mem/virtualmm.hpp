@@ -114,6 +114,10 @@ namespace Kernel {
             PTEntry Entries[KERNEL_VIRTMM_MAXPTE];
         };
 
+        struct PTableEx {
+            PTEntry Entries[1024];
+        };
+
         static inline u64 GetPML4Index(VirtualAddress VirtAddress) {
             return ((VirtAddress >> 39) & KERNEL_VIRTMM_PAGEMASK);
         }

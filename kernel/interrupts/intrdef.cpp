@@ -87,7 +87,7 @@ namespace Kernel {
         //Pic8259::Disable(); // TODO: ADD APIC COMPATIBILITY CHECK BEFORE DISABLE!
 
         /* Intiailize APIC Interrupts */
-        Apic::Status ApicStatus = Apic::Initialize();
+        //Apic::Status ApicStatus = Apic::Initialize();
         //if (!ApicStatus) printf("APIC Initialization Failed!");
 
         /* Enable HW Interrupts */

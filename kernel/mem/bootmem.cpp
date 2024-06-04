@@ -28,10 +28,19 @@ using namespace tacOS::Tools::KernelRTL;
 /// @brief Kernel End Linker Label
 extern void* KRNL_END;
 
-/* Define Statics */
+/* Define Physical Memory Statics */
 u64 BootMem::PhysicalFreeBlocks;
 u64 BootMem::PhysicalTotalBlocks;
 u64* BootMem::PhysicalMemoryMap;
+
+/* osloader.asm Page Tables */
+extern VirtualMemory::PML4Table osloader_pml4t;
+extern VirtualMemory::PDPTable osloader_pdpt;
+extern VirtualMemory::PDTable osloader_pdt;
+extern VirtualMemory::PTable osloader_ptbl;
+
+/* Define Virtual Memory Statics */
+static VirtualMemory::PTable IDMapPTable0;
 
 void BootMem::Initialize()
 {
@@ -66,10 +75,65 @@ void BootMem::Initialize()
 
     /* Populate Memory Information using the Multiboot Memory Map */
     MBootDef::MemoryMap* MBootMemoryMap = MBootProvider::MemoryMapPtr;
-    PopulateMBootMemoryInfo(MBootMemoryMap);
+    InitializePhysicalMemory(MBootMemoryMap);
+
+    for (int i = 0; i < 512; i++) {
+        IDMapPTable0.Entries[i] = (i * KERNEL_VIRTMM_PAGESIZE) | 3;
+    }
+
+    //osloader_pdt.Entries[0] = ((u64) &(IDMapPTable0)) | 3;
+    //osloader_pdt.Entries[1] = ((u64) &(IDMapPTable0.Entries[512])) | 3;
+
+    //__asm__ volatile ("mov %0, %%cr3" : : "r" (&osloader_pml4t) : "memory");
+
+    /* Setup Preliminary Virtual Memory */
+    // u64* ptr = (u64*) 2097244;
+    // *ptr = 1;
 
     /* Log Initialization */
     Logging::LogMessage(Logging::LogLevel::DEBUG, "Bootmem Allocator Init Complete");
+}
+
+/// @brief Discovers and Initializes Installed Physical Memory
+/// @param MemoryMap Multiboot2 Memory Map
+void BootMem::InitializePhysicalMemory(MBootDef::MemoryMap* MemoryMap)
+{
+    for (
+        MBootDef::MemoryMapEntry* MMapEntry = (MBootDef::MemoryMapEntry*)(MemoryMap + 1);
+        ((u8*)MMapEntry) - ((u8*)(MemoryMap + 1)) < (MemoryMap->Header.Size - sizeof(MBootDef::MemoryMap));
+        MMapEntry = (MBootDef::MemoryMapEntry*)((u8*)MMapEntry + MemoryMap->EntrySize)) {
+
+        /* Get Discovered Blocks */
+        u64 DiscoveredBlocks = (MMapEntry->Length / KERNEL_BOOTMEM_PMMGR_BLOCKSIZE);
+        u64 AlignedBaseAddr = (MMapEntry->BaseAddress / KERNEL_BOOTMEM_PMMGR_BLOCKSIZE);
+        PhysicalTotalBlocks += DiscoveredBlocks;
+
+        if (MMapEntry->Type == MBootDef::MemoryMapEntryType::AVAILABLE) {
+            /* Update Free Blocks Count and Mark As Available */
+            PhysicalFreeBlocks += DiscoveredBlocks;
+            for (; DiscoveredBlocks > 0; DiscoveredBlocks--) {
+                PhysicalMemoryMapUnset(AlignedBaseAddr++);
+            }
+
+            /* Prevent Alloc at 0x00 */
+            PhysicalMemoryMapSet(0);
+        } else {
+            /* Update Unavailable Blocks */
+            for (; DiscoveredBlocks > 0; DiscoveredBlocks--) {
+                PhysicalMemoryMapSet(AlignedBaseAddr++);
+            }
+        }
+    }
+}
+
+/// @brief Initializes Virtual Memory, Sets up Basic Paging
+void BootMem::InitializeVirtualMemory() {
+    /*
+        osloader.asm configures basic paging by identity mapping
+        the first 2MB of memory so that long mode (x64 mode) can
+        be enabled. This routine bootstraps off of that routine
+        and identity maps
+    */
 }
 
 /// @brief Allocate a Block of Physical Memory
@@ -142,34 +206,4 @@ u64 BootMem::GetPhysicalMemoryMapFreeIndex(u64 Blocks)
 
     /* Out of Memory! */
     return -1;
-}
-
-void BootMem::PopulateMBootMemoryInfo(MBootDef::MemoryMap* MemoryMap)
-{
-    for (
-        MBootDef::MemoryMapEntry* MMapEntry = (MBootDef::MemoryMapEntry*)(MemoryMap + 1);
-        ((u8*)MMapEntry) - ((u8*)(MemoryMap + 1)) < (MemoryMap->Header.Size - sizeof(MBootDef::MemoryMap));
-        MMapEntry = (MBootDef::MemoryMapEntry*)((u8*)MMapEntry + MemoryMap->EntrySize)) {
-
-        /* Get Discovered Blocks */
-        u64 DiscoveredBlocks = (MMapEntry->Length / KERNEL_BOOTMEM_PMMGR_BLOCKSIZE);
-        u64 AlignedBaseAddr = (MMapEntry->BaseAddress / KERNEL_BOOTMEM_PMMGR_BLOCKSIZE);
-        PhysicalTotalBlocks += DiscoveredBlocks;
-
-        if (MMapEntry->Type == MBootDef::MemoryMapEntryType::AVAILABLE) {
-            /* Update Free Blocks Count and Mark As Available */
-            PhysicalFreeBlocks += DiscoveredBlocks;
-            for (; DiscoveredBlocks > 0; DiscoveredBlocks--) {
-                PhysicalMemoryMapUnset(AlignedBaseAddr++);
-            }
-
-            /* Prevent Alloc at 0x00 */
-            PhysicalMemoryMapSet(0);
-        } else {
-            /* Update Unavailable Blocks */
-            for (; DiscoveredBlocks > 0; DiscoveredBlocks--) {
-                PhysicalMemoryMapSet(AlignedBaseAddr++);
-            }
-        }
-    }
 }

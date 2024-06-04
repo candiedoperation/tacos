@@ -1,13 +1,10 @@
 #Global Variables
 GPP_PARAMETERS = -m64 -I include -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore
-AS_PARAMETERS = --32
 LD_PARAMETERS = -n
 
-#Other Variables  $(BUILD_PATH)/kernel.o
 BUILD_PATH = build
-KRNL_DEPENDENCIES = $(BUILD_PATH)/osloader/osloader.o \
-					$(BUILD_PATH)/osloader/os64loader.o \
-					$(BUILD_PATH)/tools/kernelrtl/printf.o \
+SUBDIRS = osloader
+KRNL_DEPENDENCIES = $(BUILD_PATH)/tools/kernelrtl/printf.o \
 					$(BUILD_PATH)/tools/kernelrtl/strings.o \
 					$(BUILD_PATH)/drivers/hal/pic8259.o \
 					$(BUILD_PATH)/drivers/hal/apic.o \
@@ -17,7 +14,6 @@ KRNL_DEPENDENCIES = $(BUILD_PATH)/osloader/osloader.o \
 					$(BUILD_PATH)/drivers/acpi/acpipvdr.o \
 					$(BUILD_PATH)/drivers/video/vga.o \
 					$(BUILD_PATH)/kernel/assert/logging.o \
-					$(BUILD_PATH)/kernel/mem/bootmem.o \
 					$(BUILD_PATH)/kernel/mem/physicalmm.o \
 					$(BUILD_PATH)/kernel/mem/virtualmm.o \
 					$(BUILD_PATH)/kernel/multiboot/mbpvdr.o \
@@ -27,6 +23,9 @@ KRNL_DEPENDENCIES = $(BUILD_PATH)/osloader/osloader.o \
 
 #Define PHONY
 .PHONY = run run-debug clean
+
+subdirs: $(SUBDIRS)
+	$(MAKE) -C $<
 
 #Compile *.cpp to *.o
 $(BUILD_PATH)/%.o: %.cpp
@@ -39,9 +38,10 @@ $(BUILD_PATH)/%.o: %.asm
 	nasm -f elf64 $< -o $@
 
 #Kernel.bin depends on linker.ld, defined files
-$(BUILD_PATH)/kernel.bin: linker.ld $(KRNL_DEPENDENCIES)
+$(BUILD_PATH)/kernel.bin: linker.ld subdirs $(KRNL_DEPENDENCIES)
 	mkdir -p $(dir $@)
-	ld $(LD_PARAMETERS) -T $< -o $@ $(KRNL_DEPENDENCIES)
+	ld $(LD_PARAMETERS) -T $< -o $(BUILD_PATH)/kernel.bin $(BUILD_PATH)/osloader/osloader.o
+#	objcopy -O elf32-i386 $@
 
 $(BUILD_PATH)/tacos.iso: $(BUILD_PATH)/kernel.bin
 # Copy kernel.bin, Create GRUB Config, Folder needs to be named "boot"

@@ -17,7 +17,14 @@
 global osload
 global mboot_ebx
 global osloader_pml4t
+global osloader_pdt
 extern os64load
+
+extern OSLoaderPML4Tbl
+
+; testing 32bit cmp
+extern bootmem_init
+global msg_head
 
 section .multiboot
 mboot_start:
@@ -65,8 +72,6 @@ osloader_pdpt:
 osloader_pdt:
     resb 4096
 osloader_ptbl:
-    resb 4096
-osloader_ptbl2:
     resb 4096
 
 section .text
@@ -212,8 +217,9 @@ memory_paging:
         jne map_ptbl
     
     ; Enable Paging (Load PML4 Table to CR3 Register)
-    mov eax, osloader_pml4t
-    mov cr3, eax
+    call bootmem_init
+    ;mov eax, osloader_pml4t
+    ;mov cr3, eax
 
     ; Enable Physical Address Extension (PAE) using the CR4 Register
     mov eax, cr4
