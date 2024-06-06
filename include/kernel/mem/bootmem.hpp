@@ -27,6 +27,9 @@
 #define KERNEL_BOOTMEM_PMMGR_BLOCKSIZE 4096
 #define KERNEL_BOOTMEM_PMMGR_ALIGN KERNEL_BOOTMEM_PMMGR_BLOCKSIZE
 
+#define KERNEL_BOOTMEM_VMMMGR_IDEXTENDTHRESHOLD 2
+#define KERNEL_BOOTMEM_VMMMGR_MAPOFFSET 0xffff888000000000
+
 namespace tacOS {
 namespace Kernel {
     class BootMem {
@@ -35,25 +38,32 @@ namespace Kernel {
         static void PopulateMBootMemoryInfo(MBootDef::MemoryMap* MemoryMap);
 
     public:
+        /* Abstration Types */
         typedef u64 PhysicalAddress;
         typedef u64 VirtualAddress;
+
+        /* Physical Memory Variables */
         static u64 PhysicalFreeBlocks;
         static u64 PhysicalTotalBlocks;
         static u64* PhysicalMemoryMap;
 
+        /* Virtual Memory Variables */
+        static u64 VirtualFreePages;
+        static u64 VirtualTotalPages;
+
         static inline void PhysicalMemoryMapSet(u64 Bit)
         {
-            PhysicalMemoryMap[Bit / 64] |= (1 << (Bit % 64));
+            PhysicalMemoryMap[Bit / 64] |= (1ULL << (Bit % 64));
         }
 
         static inline void PhysicalMemoryMapUnset(u64 Bit)
         {
-            PhysicalMemoryMap[Bit / 64] &= ~(1 << (Bit % 64));
+            PhysicalMemoryMap[Bit / 64] &= ~(1ULL << (Bit % 64));
         }
 
         static inline bool PhysicalMemoryMapTest(u64 Bit)
         {
-            return PhysicalMemoryMap[Bit / 64] & (1 << (Bit % 64));
+            return PhysicalMemoryMap[Bit / 64] & (1ULL << (Bit % 64));
         }
 
         static inline u64 AlignAddressToPage(u64 Address)
@@ -64,6 +74,7 @@ namespace Kernel {
         static void Initialize();
         static PhysicalAddress* PhysicalMemoryAllocateBlock(u64 Size = 1);
         static void PhysicalMemoryFreeBlock(PhysicalAddress* AllocatedBlock, u64 Size = 1);
+        static void InitVirtualMemory();
         static VirtualAddress* VirtAllocateBlock();
         static void VirtFreeBlock(VirtualAddress* AllocatedBlock);
     };

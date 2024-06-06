@@ -25,13 +25,23 @@
 using namespace tacOS::Kernel;
 using namespace tacOS::Tools::KernelRTL;
 
-/// @brief Kernel End Linker Label
+/* Kernel Linker Labels */
+extern void* KRNL_START;
 extern void* KRNL_END;
 
 /* Define Statics */
 u64 BootMem::PhysicalFreeBlocks;
 u64 BootMem::PhysicalTotalBlocks;
 u64* BootMem::PhysicalMemoryMap;
+
+u64 BootMem::VirtualFreePages;
+u64 BootMem::VirtualTotalPages;
+
+/* OSLoader Paging Tables */
+extern VirtualMemory::PML4Table osloader_pml4t;
+extern VirtualMemory::PDPTable osloader_pdpt;
+extern VirtualMemory::PDTable osloader_pdt;
+extern VirtualMemory::PTable osloader_ptbl;
 
 void BootMem::Initialize()
 {
@@ -43,7 +53,7 @@ void BootMem::Initialize()
         size leading to page faults while setting up paging.
 
         This routine initializes Physical Memory Management for atmost
-        4GB of physical memory. Furthermore, it sets up preliminary pa
+        128K of physical memory. Furthermore, it sets up preliminary pa
         -ging to allow for allocation of dynamic structures. Once this
         is complete, the actual Physical and Virtual Memory Managers ta
         -ke over and map the available memory completely and manage the
@@ -68,8 +78,30 @@ void BootMem::Initialize()
     MBootDef::MemoryMap* MBootMemoryMap = MBootProvider::MemoryMapPtr;
     PopulateMBootMemoryInfo(MBootMemoryMap);
 
+    /* Setup Virtual Memory */
+    InitVirtualMemory();
+
     /* Log Initialization */
     Logging::LogMessage(Logging::LogLevel::DEBUG, "Bootmem Allocator Init Complete");
+}
+
+/// @brief Sets up environment for Virtual Memory Manager to take over
+void BootMem::InitVirtualMemory()
+{
+    /*
+        Write about auto extend identity map.
+    */
+
+    PhysicalAddress* addr1 = PhysicalMemoryAllocateBlock(50);
+    PhysicalAddress* addr2 = PhysicalMemoryAllocateBlock(250);
+    printf("\nAlloc (250): 0x");
+    printf((u64)addr1, 16);
+    printf("\nAlloc (1): 0x");
+    printf((u64)addr2, 16);
+    printf(", Kernel End: 0x");
+    printf((u64)&KRNL_END, 16);
+
+    *addr1 = 1; // testing...
 }
 
 /// @brief Allocate a Block of Physical Memory
@@ -128,7 +160,7 @@ u64 BootMem::GetPhysicalMemoryMapFreeIndex(u64 Blocks)
                     for (u64 k = 0; k < Blocks; k++) {
                         if (!PhysicalMemoryMapTest(SearchIndex + k))
                             FreeBlocks++;
-                        
+
                         else
                             break;
 
@@ -146,6 +178,9 @@ u64 BootMem::GetPhysicalMemoryMapFreeIndex(u64 Blocks)
 
 void BootMem::PopulateMBootMemoryInfo(MBootDef::MemoryMap* MemoryMap)
 {
+    /* Stores Base Address of Memory Region Processed */
+    u64 PrevBitmapIndex = 0;
+
     for (
         MBootDef::MemoryMapEntry* MMapEntry = (MBootDef::MemoryMapEntry*)(MemoryMap + 1);
         ((u8*)MMapEntry) - ((u8*)(MemoryMap + 1)) < (MemoryMap->Header.Size - sizeof(MBootDef::MemoryMap));
@@ -153,23 +188,39 @@ void BootMem::PopulateMBootMemoryInfo(MBootDef::MemoryMap* MemoryMap)
 
         /* Get Discovered Blocks */
         u64 DiscoveredBlocks = (MMapEntry->Length / KERNEL_BOOTMEM_PMMGR_BLOCKSIZE);
-        u64 AlignedBaseAddr = (MMapEntry->BaseAddress / KERNEL_BOOTMEM_PMMGR_BLOCKSIZE);
         PhysicalTotalBlocks += DiscoveredBlocks;
 
-        if (MMapEntry->Type == MBootDef::MemoryMapEntryType::AVAILABLE) {
-            /* Update Free Blocks Count and Mark As Available */
-            PhysicalFreeBlocks += DiscoveredBlocks;
-            for (; DiscoveredBlocks > 0; DiscoveredBlocks--) {
-                PhysicalMemoryMapUnset(AlignedBaseAddr++);
+        /* Store Bitmap Index and Base Memory Address */
+        u64 BaseAddress = MMapEntry->BaseAddress;
+        u64 OffsetAddress = AlignAddressToPage(BaseAddress + MMapEntry->Length);
+        u64 BitmapIndex = (BaseAddress / KERNEL_BOOTMEM_PMMGR_BLOCKSIZE);
+
+        /* Map Undefined Blocks between Previous End Address and Current Base */
+        while (PrevBitmapIndex++ < BitmapIndex) {
+            PhysicalMemoryMapSet(PrevBitmapIndex);
+        }
+
+        /* Update Free Blocks Count and Mark As Available */
+        while (BaseAddress <= OffsetAddress) {
+            /* Check if Block lies where the Kernel is Loaded */
+            if (
+                MMapEntry->Type == MBootDef::MemoryMapEntryType::AVAILABLE && (BaseAddress < ((u64)&KRNL_START) || BaseAddress > ((u64)&KRNL_END))) {
+                PhysicalFreeBlocks++;
+                PhysicalMemoryMapUnset(BitmapIndex);
+            } else {
+                /* Block Overlaps Loaded Kernel Binary */
+                PhysicalMemoryMapSet(BitmapIndex);
             }
 
-            /* Prevent Alloc at 0x00 */
-            PhysicalMemoryMapSet(0);
-        } else {
-            /* Update Unavailable Blocks */
-            for (; DiscoveredBlocks > 0; DiscoveredBlocks--) {
-                PhysicalMemoryMapSet(AlignedBaseAddr++);
-            }
+            /* Update Base Address and Bitmap Index */
+            BaseAddress += KERNEL_BOOTMEM_PMMGR_BLOCKSIZE;
+            BitmapIndex++;
         }
+
+        /* Prevent Alloc at 0x00 */
+        PhysicalMemoryMapSet(0);
+
+        /* Update Prev Bitmap Index */
+        PrevBitmapIndex = BitmapIndex;
     }
 }

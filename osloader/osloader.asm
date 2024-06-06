@@ -16,8 +16,13 @@
 
 global osload
 global mboot_ebx
-global osloader_pml4t
 extern os64load
+
+; Global Paging Tables
+global osloader_pml4t
+global osloader_pdpt
+global osloader_pdt
+global osloader_ptbl
 
 section .multiboot
 mboot_start:
