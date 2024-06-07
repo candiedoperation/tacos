@@ -27,6 +27,7 @@
 #define KERNEL_VIRTMM_MAXPDE 512
 #define KERNEL_VIRTMM_MAXPTE 512
 #define KERNEL_VIRTMM_PAGEMASK 0x1FF /* 0001 1111 1111 (9 bits) */
+#define KERNEL_VIRTMM_ADDRESSMASK 0xFFF /* Mask for Lowest 12 bits */
 
 /* Virtual Address Space Offsets */
 #define KERNEL_VIRTMM_PHYMEM_MAPOFFSET 0xffff888000000000
@@ -128,6 +129,10 @@ namespace Kernel {
         
         static inline u64 GetPTIndex(VirtualAddress VirtAddress) {
             return ((VirtAddress >> 12) & KERNEL_VIRTMM_PAGEMASK);
+        }
+
+        static inline u64 GetBaseAddress(u64 PageTableEntry) {
+            return (PageTableEntry & ~KERNEL_VIRTMM_ADDRESSMASK);
         }
 
         static VirtualAddress* AllocateBlock(PML4Table* PML4TablePtr);

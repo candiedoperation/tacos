@@ -27,16 +27,13 @@
 #define KERNEL_BOOTMEM_PMMGR_BLOCKSIZE 4096
 #define KERNEL_BOOTMEM_PMMGR_ALIGN KERNEL_BOOTMEM_PMMGR_BLOCKSIZE
 
-#define KERNEL_BOOTMEM_VMMMGR_IDEXTENDTHRESHOLD 2
-#define KERNEL_BOOTMEM_VMMMGR_MAPOFFSET 0xffff888000000000
+#define KERNEL_BOOTMEM_VMMGR_PAGESIZE 4096
+#define KERNEL_BOOTMEM_VMMGR_IDEXTENDTHRESHOLD 2
+#define KERNEL_BOOTMEM_VMMGR_MAPOFFSET 0xffff888000000000
 
 namespace tacOS {
 namespace Kernel {
     class BootMem {
-    private:
-        static u64 GetPhysicalMemoryMapFreeIndex(u64 Blocks = 1);
-        static void PopulateMBootMemoryInfo(MBootDef::MemoryMap* MemoryMap);
-
     public:
         /* Abstration Types */
         typedef u64 PhysicalAddress;
@@ -50,6 +47,7 @@ namespace Kernel {
         /* Virtual Memory Variables */
         static u64 VirtualFreePages;
         static u64 VirtualTotalPages;
+        static VirtualAddress VirtualMaxIDMappedAddr;
 
         static inline void PhysicalMemoryMapSet(u64 Bit)
         {
@@ -72,11 +70,16 @@ namespace Kernel {
         }
 
         static void Initialize();
-        static PhysicalAddress* PhysicalMemoryAllocateBlock(u64 Size = 1);
-        static void PhysicalMemoryFreeBlock(PhysicalAddress* AllocatedBlock, u64 Size = 1);
-        static void InitVirtualMemory();
         static VirtualAddress* VirtAllocateBlock();
         static void VirtFreeBlock(VirtualAddress* AllocatedBlock);
+
+    private:
+        static u64 GetPhysicalMemoryMapFreeIndex(u64 Blocks = 1);
+        static void InitPhysicalMemory(MBootDef::MemoryMap* MemoryMap);
+        static void InitVirtualMemory(MBootDef::MemoryMap* MemoryMap);
+        static PhysicalAddress* PhysicalMemoryAllocateBlock(u64 Size = 1);
+        static PhysicalAddress* PhysicalMemoryAllocateIDMappedBlock(u64 Size = 1);
+        static void PhysicalMemoryFreeBlock(PhysicalAddress* AllocatedBlock, u64 Size = 1);
     };
 }
 }
