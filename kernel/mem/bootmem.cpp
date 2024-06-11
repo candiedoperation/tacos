@@ -80,15 +80,13 @@ void BootMem::Initialize()
     /* Populate Memory Information using the Multiboot Memory Map */
     MBootDef::MemoryMap* MBootMemoryMap = MBootProvider::MemoryMapPtr;
     InitPhysicalMemory(MBootMemoryMap);
-
-    // int i = 512;
-    // while (i--) {
-    //     PhysicalMemoryAllocateIDMappedBlock();
-    //     // printf("\nAlloc: 0x");
-    //     // printf((u64)PhysicalMemoryAllocateBlock(), 16);
-    // }
-
     InitVirtualMemory(MBootMemoryMap);
+
+    /* test virt alloc */
+    VirtualAddress* alloc = VirtAllocateBlock(2);
+    printf("\nVMM Alloc Test: 0x");
+    printf((u64) alloc, 16);
+    *alloc = 10000;
 
     printf("\n\nPhysical Memory: ");
     printf((PhysicalTotalBlocks - PhysicalFreeBlocks) * 4);
@@ -251,6 +249,33 @@ u64 BootMem::GetPhysicalMemoryMapFreeIndex(u64 Blocks)
     return -1;
 }
 
+/// @brief Allocates blocks from Virtual Memory Space
+/// @param Size Number of Blocks to allocate
+/// @return Pointer to Block
+BootMem::VirtualAddress* BootMem::VirtAllocateBlock(u64 Size)
+{
+    /* Allocate a Physical Memory Block */
+    PhysicalAddress* BaseAlloc = PhysicalMemoryAllocateBlock(Size);
+
+    /* Return 0 if Out of Memory */
+    if (!BaseAlloc)
+        return 0;
+
+    /* Append Offset, Clean the Memory Block and Return */
+    VirtualAddress* VirtBaseAlloc = (VirtualAddress*)(((u64) BaseAlloc) + KERNEL_BOOTMEM_VMMGR_MAPOFFSET);
+    memset(VirtBaseAlloc, 0, (Size * KERNEL_BOOTMEM_PMMGR_BLOCKSIZE));
+    return VirtBaseAlloc;
+}
+
+/// @brief Frees a Previously Allocated Virtual Memory Block
+/// @param AllocatedBlock Pointer to Previously Allocated Block
+/// @param Size Number of Blocks previously Allocated
+void BootMem::VirtFreeBlock(VirtualAddress* AllocatedBlock, u64 Size)
+{
+    VirtualAddress VirtBaseAlloc = ((u64) AllocatedBlock) - KERNEL_BOOTMEM_VMMGR_MAPOFFSET;
+    PhysicalMemoryFreeBlock((PhysicalAddress*) VirtBaseAlloc, Size);
+}
+
 void BootMem::InitPhysicalMemory(MBootDef::MemoryMap* MemoryMap)
 {
     /* Stores Base Address of Memory Region Processed */
@@ -262,11 +287,11 @@ void BootMem::InitPhysicalMemory(MBootDef::MemoryMap* MemoryMap)
         MMapEntry = (MBootDef::MemoryMapEntry*)((u8*)MMapEntry + MemoryMap->EntrySize)) {
 
         /* Debugging */
-        printf("\n    Region Start: 0x");
-        printf(MMapEntry->BaseAddress, 16);
-        printf(", Length: ");
-        printf(MMapEntry->Length / 1024);
-        printf("KB ");
+        // printf("\n    Region Start: 0x");
+        // printf(MMapEntry->BaseAddress, 16);
+        // printf(", Length: ");
+        // printf(MMapEntry->Length / 1024);
+        // printf("KB ");
 
         /* Get Discovered Blocks */
         u64 DiscoveredBlocks = (MMapEntry->Length / KERNEL_BOOTMEM_PMMGR_BLOCKSIZE);

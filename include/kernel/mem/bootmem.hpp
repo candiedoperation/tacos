@@ -71,8 +71,8 @@ namespace Kernel {
         }
 
         static void Initialize();
-        static VirtualAddress* VirtAllocateBlock();
-        static void VirtFreeBlock(VirtualAddress* AllocatedBlock);
+        static VirtualAddress* VirtAllocateBlock(u64 Size = 1);
+        static void VirtFreeBlock(VirtualAddress* AllocatedBlock, u64 Size = 1);
 
     private:
         static u64 GetPhysicalMemoryMapFreeIndex(u64 Blocks = 1);
