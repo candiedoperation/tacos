@@ -27,7 +27,7 @@ namespace tacOS {
 namespace Tools {
     namespace KernelRTL {
         i32 strncmp(const char* s1, const char* s2, usize len);
-        void* memset(void* ptr, u64 value, u64 num);
+        void* memset(void* ptr, u8 value, u64 num);
     }
 }
 }

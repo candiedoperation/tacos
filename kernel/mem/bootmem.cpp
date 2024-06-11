@@ -81,10 +81,11 @@ void BootMem::Initialize()
     MBootDef::MemoryMap* MBootMemoryMap = MBootProvider::MemoryMapPtr;
     InitPhysicalMemory(MBootMemoryMap);
 
-    // int i = 1000;
+    // int i = 512;
     // while (i--) {
-    //     printf("\nAlloc: 0x");
-    //     printf((u64)PhysicalMemoryAllocateBlock(), 16);
+    //     PhysicalMemoryAllocateIDMappedBlock();
+    //     // printf("\nAlloc: 0x");
+    //     // printf((u64)PhysicalMemoryAllocateBlock(), 16);
     // }
 
     InitVirtualMemory(MBootMemoryMap);
@@ -103,7 +104,7 @@ void BootMem::Initialize()
 
 /// @brief Allocate a Block of Physical Memory
 /// @param Size Required number of contiguous blocks
-/// @return Pointer to Allocated Block
+/// @return Pointer to Allocated Block (BLOCK IS NOT CLEARED)
 BootMem::PhysicalAddress* BootMem::PhysicalMemoryAllocateBlock(u64 Size)
 {
     /* Get First Free Location, Check if Out of Memory */
@@ -116,30 +117,30 @@ BootMem::PhysicalAddress* BootMem::PhysicalMemoryAllocateBlock(u64 Size)
         PhysicalMemoryMapSet(Frame + i);
     }
 
-    /* Clear the Memory Block */
-    PhysicalAddress* BaseAddress = (PhysicalAddress*)(Frame * KERNEL_BOOTMEM_PMMGR_BLOCKSIZE);
-    memset(BaseAddress, 0, (Size * KERNEL_BOOTMEM_PMMGR_BLOCKSIZE));
-
     /* Update Free Frames and Return Physical Address */
     PhysicalFreeBlocks -= Size;
-    return BaseAddress;
+    return (PhysicalAddress*)(Frame * KERNEL_BOOTMEM_PMMGR_BLOCKSIZE);
 }
 
 /// @brief Allocates a block of Identity-mapped Physical Memory
 /// @param Size Required number of contiguous blocks
-/// @return Pointer to Allocated Block
+/// @return Pointer to Allocated Block (ZERO FILLED)
 BootMem::PhysicalAddress* BootMem::PhysicalMemoryAllocateIDMappedBlock(u64 Size)
 {
     PhysicalAddress* AllocBase = PhysicalMemoryAllocateBlock(Size);
-    PhysicalAddress* AllocOffset = AllocBase + (Size * KERNEL_BOOTMEM_PMMGR_BLOCKSIZE);
+    u64 AllocOffset = ((u64)AllocBase) + (Size * KERNEL_BOOTMEM_PMMGR_BLOCKSIZE);
 
     /* Check if Addr is in the Identity Map Region */
-    if ((u64)AllocOffset <= VirtualMaxIDMappedAddr)
+    if (AllocOffset < (VirtualMaxIDMappedAddr - KERNEL_BOOTMEM_PMMGR_ALLOCTHRESBYTES)) {
+        /* Clear the Memory Block and Return it */
+        memset(AllocBase, 0, (Size * KERNEL_BOOTMEM_PMMGR_BLOCKSIZE));
         return AllocBase;
+    }
 
     else {
         /* Return the Block if block is >4KB then, Get a new one */
         PhysicalAddress* AllocatedPT;
+
         if (Size == 1)
             AllocatedPT = AllocBase;
 
@@ -147,6 +148,9 @@ BootMem::PhysicalAddress* BootMem::PhysicalMemoryAllocateIDMappedBlock(u64 Size)
             PhysicalMemoryFreeBlock(AllocBase, Size);
             AllocatedPT = PhysicalMemoryAllocateBlock(1);
         }
+
+        /* Clear The Memory Block (Size 1) */
+        memset(AllocatedPT, 0, 1);
 
         /* Get the Next Page (Not Identity Mapped) */
         VirtualAddress IDMapBaseAddr = (VirtualMaxIDMappedAddr + KERNEL_VIRTMM_PAGESIZE);
@@ -181,14 +185,15 @@ BootMem::PhysicalAddress* BootMem::PhysicalMemoryAllocateIDMappedBlock(u64 Size)
         }
 
         /* Map Page Table to appropriate Tables */
-        PDTable->Entries[PDTIndex] = ((u64) AllocatedPT) | 3;
+        PDTable->Entries[PDTIndex] = ((u64)AllocatedPT) | 3;
 
         /* Update Max Addr, Flush the TLB (Translation Lookaside Buffer) */
-        VirtualMaxIDMappedAddr = AllocatedPT[KERNEL_VIRTMM_MAXPTE - 1];
-        __asm__ volatile("mov %0, %%cr3" : : "r"(&osloader_pml4t) : "memory");
+        VirtualMaxIDMappedAddr = VirtualMemory::GetBaseAddress(AllocatedPT[KERNEL_VIRTMM_MAXPTE - 1]);
+        FlushTLBCache();
 
-        /* Reallocate the required Block */
+        /* Reallocate the required Block, Clear it and Return it */
         AllocBase = PhysicalMemoryAllocateBlock(Size);
+        memset(AllocBase, 0, (Size * KERNEL_BOOTMEM_PMMGR_BLOCKSIZE));
         return AllocBase;
     }
 }
@@ -256,6 +261,13 @@ void BootMem::InitPhysicalMemory(MBootDef::MemoryMap* MemoryMap)
         ((u8*)MMapEntry) - ((u8*)(MemoryMap + 1)) < (MemoryMap->Header.Size - sizeof(MBootDef::MemoryMap));
         MMapEntry = (MBootDef::MemoryMapEntry*)((u8*)MMapEntry + MemoryMap->EntrySize)) {
 
+        /* Debugging */
+        printf("\n    Region Start: 0x");
+        printf(MMapEntry->BaseAddress, 16);
+        printf(", Length: ");
+        printf(MMapEntry->Length / 1024);
+        printf("KB ");
+
         /* Get Discovered Blocks */
         u64 DiscoveredBlocks = (MMapEntry->Length / KERNEL_BOOTMEM_PMMGR_BLOCKSIZE);
         PhysicalTotalBlocks += DiscoveredBlocks;
@@ -295,7 +307,7 @@ void BootMem::InitPhysicalMemory(MBootDef::MemoryMap* MemoryMap)
     }
 
     /* Memory Containing Kernel and Bitmap should be Marked as Used */
-    u64 BaseAddress = ((u64)&KRNL_START);
+    u64 BaseAddress = ((u64)&KRNL_START) && 0;
     u64 OffsetAddress = AlignAddressToPage(((u64)&KRNL_END) + (PrevBitmapIndex / 64));
     u64 BitmapIndex = (BaseAddress / KERNEL_BOOTMEM_PMMGR_BLOCKSIZE);
 
@@ -339,40 +351,58 @@ void BootMem::InitVirtualMemory(MBootDef::MemoryMap* MemoryMap)
         u64 BaseAddress = AlignAddressToPage(MMapEntry->BaseAddress);
         u64 OffsetAddress = AlignAddressToPage(MMapEntry->BaseAddress + MMapEntry->Length);
 
-        int logl = 5;
-        while (BaseAddress <= OffsetAddress) {
-            VirtualAddress VirtBaseAddress = BaseAddress + KERNEL_VIRTMM_PHYMEM_MAPOFFSET;
-            u64 PML4Index = VirtualMemory::GetPML4Index(VirtBaseAddress);
-            u64 PDPTIndex = VirtualMemory::GetPDPTIndex(VirtBaseAddress);
-            u64 PDTIndex = VirtualMemory::GetPDTIndex(VirtBaseAddress);
-            u64 PTIndex = VirtualMemory::GetPTIndex(VirtBaseAddress);
+        if (MMapEntry->Type == MBootDef::MemoryMapEntryType::AVAILABLE) {
+            while (BaseAddress <= OffsetAddress) {
+                VirtualAddress VirtBaseAddress = BaseAddress + KERNEL_VIRTMM_PHYMEM_MAPOFFSET;
+                u64 PML4Index = VirtualMemory::GetPML4Index(VirtBaseAddress);
+                u64 PDPTIndex = VirtualMemory::GetPDPTIndex(VirtBaseAddress);
+                u64 PDTIndex = VirtualMemory::GetPDTIndex(VirtBaseAddress);
+                u64 PTIndex = VirtualMemory::GetPTIndex(VirtBaseAddress);
 
-            // lazy code. optimize on mvp.
-            if (!osloader_pml4t.Entries[PML4Index]) {
-                PhysicalAddress* AllocatedPDPT = PhysicalMemoryAllocateIDMappedBlock();
-                osloader_pml4t.Entries[PML4Index] = (VirtualMemory::PML4Entry)AllocatedPDPT | 0;
-                printf("\n=> PDPT CREATED: 0x"); // debug
-                printf((u64)AllocatedPDPT, 16);
+                // lazy code. optimize on mvp.
+                if (!osloader_pml4t.Entries[PML4Index]) {
+                    PhysicalAddress* AllocatedPDPT = PhysicalMemoryAllocateIDMappedBlock();
+                    osloader_pml4t.Entries[PML4Index] = (VirtualMemory::PML4Entry)AllocatedPDPT | 3;
+                    FlushTLBCache();
+
+                    /* Debug. FUTURE: Improve */
+                    printf("\n=> PDPT CREATED: 0x");
+                    printf((u64)AllocatedPDPT, 16);
+                }
+
+                VirtualMemory::PDPTable* PDPTable = (VirtualMemory::PDPTable*)VirtualMemory::GetBaseAddress(osloader_pml4t.Entries[PML4Index]);
+                if (!PDPTable->Entries[PDPTIndex]) {
+                    PhysicalAddress* AllocatedPDT = PhysicalMemoryAllocateIDMappedBlock();
+                    PDPTable->Entries[PDPTIndex] = (VirtualMemory::PDPEntry)AllocatedPDT | 3;
+                    FlushTLBCache();
+
+                    /* Debug. FUTURE: Improve */
+                    printf("\n=> PDT CREATED: 0x");
+                    printf((u64)AllocatedPDT, 16);
+                }
+
+                VirtualMemory::PDTable* PDTable = (VirtualMemory::PDTable*)VirtualMemory::GetBaseAddress(PDPTable->Entries[PDPTIndex]);
+                if (!PDTable->Entries[PDTIndex]) {
+                    PhysicalAddress* AllocatedPT = PhysicalMemoryAllocateIDMappedBlock();
+                    PDTable->Entries[PDTIndex] = (VirtualMemory::PDEntry)AllocatedPT | 3;
+                    FlushTLBCache();
+
+                    /* Debug. FUTURE: Improve */
+                    // printf("\n=> Page Table CREATED: 0x");
+                    // printf((u64) AllocatedPT, 16);
+                }
+
+                /* Update the Page Table */
+                VirtualMemory::PTable* PTable = (VirtualMemory::PTable*)VirtualMemory::GetBaseAddress(PDTable->Entries[PDTIndex]);
+                PTable->Entries[PTIndex] = BaseAddress | 3;
+                FlushTLBCache();
+
+                /* Increment Base Address */
+                BaseAddress += KERNEL_VIRTMM_PAGESIZE;
             }
-
-            VirtualMemory::PDPTable* PDPTable = (VirtualMemory::PDPTable*)VirtualMemory::GetBaseAddress(osloader_pml4t.Entries[PML4Index]);
-            if (!PDPTable->Entries[PDPTIndex]) {
-                PhysicalAddress* AllocatedPDT = PhysicalMemoryAllocateIDMappedBlock();
-                PDPTable->Entries[PDPTIndex] = (VirtualMemory::PDPEntry)AllocatedPDT | 0;
-                printf("\n=> PDT CREATED: 0x");
-                printf((u64)AllocatedPDT, 16);
-            }
-
-            VirtualMemory::PDTable* PDTable = (VirtualMemory::PDTable*)VirtualMemory::GetBaseAddress(PDPTable->Entries[PDPTIndex]);
-            if (!PDTable->Entries[PDTIndex]) {
-                PhysicalAddress* AllocatedPT = PhysicalMemoryAllocateIDMappedBlock();
-                PDTable->Entries[PDTIndex] = (VirtualMemory::PDEntry)AllocatedPT | 0;
-                // printf("\n=> Page Table CREATED: 0x");
-                // printf((u64) AllocatedPT, 16);
-            }
-
-            /* Increment Base Address */
-            BaseAddress += KERNEL_VIRTMM_PAGESIZE;
         }
     }
+
+    /* Flush Translation Lookaside Buffer (TLB) Cache */
+    FlushTLBCache();
 }

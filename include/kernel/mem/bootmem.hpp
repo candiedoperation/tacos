@@ -24,11 +24,12 @@
 
 #define KERNEL_BOOTMEM_PMMGR_BLOCKALLOCLIMIT 512 /* Max 2MB Bitmap Based Alloc */
 #define KERNEL_BOOTMEM_PMMGR_BLOCKSPERBYTE 8
+#define KERNEL_BOOTMEM_PMMGR_IDETHRESHOLD 5
 #define KERNEL_BOOTMEM_PMMGR_BLOCKSIZE 4096
 #define KERNEL_BOOTMEM_PMMGR_ALIGN KERNEL_BOOTMEM_PMMGR_BLOCKSIZE
+#define KERNEL_BOOTMEM_PMMGR_ALLOCTHRESBYTES (KERNEL_BOOTMEM_PMMGR_IDETHRESHOLD * KERNEL_BOOTMEM_PMMGR_BLOCKSIZE)
 
 #define KERNEL_BOOTMEM_VMMGR_PAGESIZE 4096
-#define KERNEL_BOOTMEM_VMMGR_IDEXTENDTHRESHOLD 2
 #define KERNEL_BOOTMEM_VMMGR_MAPOFFSET 0xffff888000000000
 
 namespace tacOS {
@@ -80,6 +81,14 @@ namespace Kernel {
         static PhysicalAddress* PhysicalMemoryAllocateBlock(u64 Size = 1);
         static PhysicalAddress* PhysicalMemoryAllocateIDMappedBlock(u64 Size = 1);
         static void PhysicalMemoryFreeBlock(PhysicalAddress* AllocatedBlock, u64 Size = 1);
+
+        static inline void FlushTLBCache() {
+            /* Flush Translation Lookaside Buffer (TLB), AT&T Syntax */
+            __asm__ volatile(
+                "mov %cr3, %rax\n"
+                "mov %rax, %cr3"
+            );
+        }
     };
 }
 }

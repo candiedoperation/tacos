@@ -31,8 +31,8 @@ i32 KernelRTL::strncmp(const char* s1, const char* s2, usize len)
     return diff;
 }
 
-void* KernelRTL::memset(void* dest, u64 value, u64 len) {
-    u64* ptr = (u64*) dest;
+void* KernelRTL::memset(void* dest, u8 value, u64 len) {
+    u8* ptr = (u8*) dest;
     while (len-- > 0) {
         *(ptr++) = value;
     }
