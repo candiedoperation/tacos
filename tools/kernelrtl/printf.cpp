@@ -26,7 +26,7 @@ using namespace tacOS::Drivers::Video;
 /// @brief Draft printf Function (u64 Only)
 /// @param Num u64 Integer
 void KernelRTL::printf(u64 Num, int Base) {
-    char* map = "0123456789ABCDEF";
+    char map[] = "0123456789ABCDEF";
     char tmp[21];
     tmp[20] = '\0';
     u8 i = sizeof(tmp);

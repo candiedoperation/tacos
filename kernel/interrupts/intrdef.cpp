@@ -84,11 +84,11 @@ namespace Kernel {
     void Interrupt::InitHWInterrupts() {
         /* Initialize Interrupt Controllers */
         Pic8259::Initialize();
-        //Pic8259::Disable(); // TODO: ADD APIC COMPATIBILITY CHECK BEFORE DISABLE!
+        Pic8259::Disable(); // TODO: ADD APIC COMPATIBILITY CHECK BEFORE DISABLE!
 
         /* Intiailize APIC Interrupts */
         Apic::Status ApicStatus = Apic::Initialize();
-        //if (!ApicStatus) printf("APIC Initialization Failed!");
+        if (!ApicStatus) printf("APIC Initialization Failed!");
 
         /* Enable HW Interrupts */
         __asm__ volatile("sti");

@@ -16,6 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <kernel/mem/virtualmm.hpp>
 #include <drivers/acpi/acpipvdr.hpp>
 #include <drivers/hal/apic.hpp>
 #include <tools/kernelrtl/kernelrtl.hpp>
@@ -109,13 +110,13 @@ Apic::Status Apic::Initialize()
         }
     }
 
-    printf("De-referencing: 0x");
-    printf(IoApic->ApicAddress, 16);
-    printf("\n");
+    /* Map IO/APIC to Virtual Address Space */
+    u64* IoApicAddr = VirtualMemory::HardwareRemap((u64*) IoApic->ApicAddress);
+    printf("\nIO/APIC Addr: 0x");
+    printf((u64) IoApicAddr, 16);
 
     /* Write to IOREGSEL */
-    u8* ApicBasePtr = (u8*) IoApic->ApicAddress;
-    *ApicBasePtr = 0;
+    *IoApicAddr = 0;
 
     return Status::OK;
 }

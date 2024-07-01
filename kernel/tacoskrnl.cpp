@@ -57,7 +57,7 @@ extern "C" void LoadKernel(u64 MultibootInfoAddr)
     }
 
     /* Enable HW Interrupts */
-    //Interrupt::InitHWInterrupts();
+    Interrupt::InitHWInterrupts();
 
     /* Check if CPU Exceptions and Interrupts Interrupts Work! */
     // int DivByZ = 1/0;

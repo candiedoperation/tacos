@@ -49,20 +49,6 @@ void PhysicalMemory::Initialize()
     u64 StackAddress = ((((u64)&KRNL_END) & ~(KERNEL_PHYSICALMM_BLOCKALIGN - 1)) + (u64)&KRNL_END);
     AvailableBlocksPtr = (PhysicalAddress*)StackAddress;
 
-    /*
-        FIXING THE ALLOC!
-        HOW ABOUT HAVING A COUPLE OF ADDRESSES <2MB FOR PAGING?
-        ONCE A RESONABLE REGION IS IDENTITY MAPPED, CONTINUE?
-
-        Linux Approach:
-        Bootmem - Bitmap Allocator
-        Virt Alloc based on that
-
-        Once we can get reasonable mem, bootstrap off it
-        setup direct mapping, use stack-based phy / buddy in future,
-        bootmem calls new phy/virt mm. ?
-    */
-
     /* Populate Stack using Multiboot Memory Map */
     MBootDef::MemoryMap* MBootMemoryMap = MBootProvider::MemoryMapPtr;
     ProcessMBootMemoryMap(MBootMemoryMap);

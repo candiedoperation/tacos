@@ -16,12 +16,11 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <kernel/mem/virtualmm.hpp>
 #include <drivers/acpi/acpipvdr.hpp>
-#include <drivers/video/vga.hpp>
 #include <tools/kernelrtl/kernelrtl.hpp>
 
 using namespace tacOS::Drivers::Acpi;
-using namespace tacOS::Drivers::Video;
 using namespace tacOS::Tools::KernelRTL;
 
 /// @brief Checks if current string is RSD PTR

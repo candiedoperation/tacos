@@ -20,6 +20,7 @@
 #define KERNEL_VIRTMEM_PAGEMAP_HPP
 
 #include <kernel/types.hpp>
+#include <kernel/mem/physicalmm.hpp>
 
 #define KERNEL_VIRTMM_PAGESIZE 4096
 #define KERNEL_VIRTMM_MAXPML4E 512
@@ -30,8 +31,10 @@
 #define KERNEL_VIRTMM_ADDRESSMASK 0xFFF /* Mask for Lowest 12 bits */
 
 /* Virtual Address Space Offsets */
-#define KERNEL_VIRTMM_PHYMEM_MAPOFFSET 0xffff888000000000
-#define KERNEL_VIRTMM_PHYMEM_MAPOFFSETEND 0xffffc87fffffffff
+#define KERNEL_VIRTMM_HWMEM_MAPOFFSET 0xffffc90000000000ULL     /* Hardware Remap Offset Start */
+#define KERNEL_VIRTMM_HWMEM_MAPOFFSETEND 0xffffe8ffffffffffULL  /* Hardware Remap Offset End */
+#define KERNEL_VIRTMM_PHYMEM_MAPOFFSET 0xffff888000000000ULL    /* Physical Memory Direct Map Start */
+#define KERNEL_VIRTMM_PHYMEM_MAPOFFSETEND 0xffffc87fffffffffULL /* Physical Memory Direct Map End */
 
 namespace tacOS {
 namespace Kernel {
@@ -135,6 +138,8 @@ namespace Kernel {
             return (PageTableEntry & ~KERNEL_VIRTMM_ADDRESSMASK);
         }
 
+        static VirtualAddress* HardwareRemap(PhysicalMemory::PhysicalAddress* BaseAddress);
+        static VirtualAddress* MapPhysicalFrame(PhysicalMemory::PhysicalAddress* BaseAddress);
         static VirtualAddress* AllocateBlock(PML4Table* PML4TablePtr);
         static void Intialize();
     };

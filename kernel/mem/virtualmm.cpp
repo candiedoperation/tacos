@@ -17,7 +17,7 @@
 */
 
 #include <kernel/assert/logging.hpp>
-#include <kernel/mem/physicalmm.hpp>
+#include <kernel/mem/bootmem.hpp>
 #include <kernel/mem/virtualmm.hpp>
 #include <tools/kernelrtl/kernelrtl.hpp>
 
@@ -25,13 +25,6 @@ using namespace tacOS::Kernel;
 
 /* osloader.asm Page Tables */
 extern VirtualMemory::PML4Table osloader_pml4t;
-
-/* Define Statics */
-static VirtualMemory::PML4Table PML4Table0 alignas(4096);
-static VirtualMemory::PDPTable PDPTable0;
-static VirtualMemory::PDTable PDTable0;
-static VirtualMemory::PTable PTable0;
-static VirtualMemory::PTable PTable1;
 
 /// @brief
 /// @param PML4Table
@@ -52,6 +45,26 @@ VirtualMemory::VirtualAddress* VirtualMemory::AllocateBlock(PML4Table* PML4Table
     Tools::KernelRTL::printf(VirtAddress, 16);
 }
 
+/// @brief Maps a Physical Memory Address to the Virtual Address Space
+/// @param BaseAddress Physical Memory Address (Pointer)
+/// @return Pointer to the mapped Virtual Address
+VirtualMemory::VirtualAddress* VirtualMemory::MapPhysicalFrame(
+    PhysicalMemory::PhysicalAddress* BaseAddress)
+{
+}
+
+/// @brief Maps Physical Memory Mapped Hardware Addresses to Virtual Address Space
+/// @param BaseAddress Memory-Mapped Physical Address
+/// @return Memory-Mapped Virtual Address
+VirtualMemory::VirtualAddress* VirtualMemory::HardwareRemap(
+    PhysicalMemory::PhysicalAddress* BaseAddress)
+{
+    /* UGLY CODE !!!, TEMPORARY */
+    /* FUTURE: Impl. should use Virtual Address Manager, Include Security!!! */
+    BootMem::PhysicalMemoryMapToOffset((u64)BaseAddress, KERNEL_VIRTMM_HWMEM_MAPOFFSET);
+    return (VirtualAddress*)((u64)BaseAddress + KERNEL_VIRTMM_HWMEM_MAPOFFSET);
+}
+
 /// @brief Setup Structures, Configure Memory Paging
 void VirtualMemory::Intialize()
 {
@@ -70,22 +83,4 @@ void VirtualMemory::Intialize()
         http://www.brokenthorn.com/Resources/OSDev18.html
         http://www.osdever.net/tutorials/view/memory-management-1
     */
-
-    /* Identity Map first 2MB of Physical Memory */
-    for (int i = 0; i < KERNEL_VIRTMM_MAXPTE; i++) {
-        PTable0.Entries[i] = (i * KERNEL_VIRTMM_PAGESIZE) | 3;
-    }
-
-    /* 1g is identify mapped by osloader.asm */
-    PDTable0.Entries[0] = ((u64) &PTable0) | 3;
-    PDPTable0.Entries[0] = ((u64) &PDTable0) | 3;
-    PML4Table0.Entries[0] = ((u64) &PDPTable0) | 3;
-    
-    /* Directly Map 2MB of Available Physical Memory */
-    for (int i = 0; i < KERNEL_VIRTMM_MAXPTE; i++) {
-        //PhysicalMemory::AvailableBlocksPtr
-    }
-
-    __asm__ volatile ("mov %0, %%cr3" : : "r" (&PML4Table0) : "memory");
-    //__asm__ volatile("mov %0, %%cr3" : : "r"(&osloader_pml4t) : "memory");
 }
